@@ -1,9 +1,10 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Edit, Trash2, Zap, Shield, Settings } from "lucide-react";
+import { Play, Pause, Edit, Trash2, Zap, Shield, Settings, Copy } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
+import { CopyButton, CopyBadge } from "@/components/common";
 import type { ModelRegistry } from "@/types/models";
 import type { ModelAction } from "@/types/admin";
 import { cn } from "@/lib/utils";
@@ -65,6 +66,16 @@ export default function ModelCard({ model, onPromote, onEdit, onDelete, onAction
             <p className="text-sm text-muted-foreground">
               {model.algorithm || "Algoritmus: ismeretlen"}
             </p>
+            <div className="flex items-center gap-2 mt-2">
+              <CopyBadge 
+                text={model.id} 
+                showIcon={true}
+                className="font-mono text-xs"
+                aria-label={`Copy model ID: ${model.id}`}
+              >
+                ID: {model.id.slice(0, 8)}...
+              </CopyBadge>
+            </div>
           </div>
           <Badge className={cn("uppercase text-[11px] font-semibold tracking-wide", typeBadgeVariant(model.model_type))}>
             {model.model_type}
@@ -102,6 +113,25 @@ export default function ModelCard({ model, onPromote, onEdit, onDelete, onAction
           <div className="text-sm text-muted-foreground">
             <p className="font-medium text-foreground mb-1">Description</p>
             <p>{model.description}</p>
+          </div>
+        )}
+        {model.hyperparameters && (
+          <div className="text-sm">
+            <div className="flex items-center justify-between mb-2">
+              <p className="font-medium text-foreground">Hyperparameters</p>
+              <CopyButton
+                text={model.hyperparameters}
+                size="sm"
+                variant="outline"
+                successMessage="Hyperparameters copied to clipboard"
+              >
+                <Copy className="w-3 h-3 mr-1" />
+                Copy JSON
+              </CopyButton>
+            </div>
+            <pre className="bg-muted/50 rounded p-2 text-xs font-mono overflow-x-auto">
+              {JSON.stringify(JSON.parse(model.hyperparameters), null, 2)}
+            </pre>
           </div>
         )}
       </CardContent>

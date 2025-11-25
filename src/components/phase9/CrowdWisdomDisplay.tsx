@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Users, AlertCircle } from 'lucide-react';
+import { Loader2, Users, AlertCircle, Copy } from 'lucide-react';
+import { CopyButton } from '@/components/common';
 import { CollaborativeIntelligenceService } from '@/lib/phase9-api';
 import type { CrowdWisdomDisplayProps, CrowdWisdom, DivergenceAnalysis } from '@/types/phase9';
 
@@ -22,7 +23,7 @@ export const CrowdWisdomDisplay: React.FC<CrowdWisdomDisplayProps> = ({
 }) => {
   const [data, setData] = useState<CrowdWisdomData>({ isLoading: true });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setData(prev => ({ ...prev, isLoading: true, error: undefined }));
 
@@ -48,7 +49,7 @@ export const CrowdWisdomDisplay: React.FC<CrowdWisdomDisplayProps> = ({
         error: error instanceof Error ? error.message : 'Failed to fetch crowd wisdom'
       });
     }
-  };
+  }, [matchId, showDivergence]);
 
   useEffect(() => {
     fetchData();
@@ -57,7 +58,33 @@ export const CrowdWisdomDisplay: React.FC<CrowdWisdomDisplayProps> = ({
       const interval = setInterval(fetchData, refreshInterval);
       return () => clearInterval(interval);
     }
-  }, [matchId, refreshInterval, showDivergence, fetchData]);
+  }, [fetchData, refreshInterval]);
+
+  const getCrowdWisdomSummary = () => {
+    if (!data.crowdWisdom) return '';
+    
+    const cw = data.crowdWisdom;
+    return `Crowd Wisdom Summary for Match ${matchId}
+Total Predictions: ${cw.total_predictions}
+Consensus: ${cw.consensus_prediction.replace('_', ' ').toUpperCase()}
+Consensus Confidence: ${cw.consensus_confidence.toFixed(1)}%
+Average Confidence: ${cw.average_confidence.toFixed(1)}%
+
+Distribution:
+- Home Win: ${cw.home_win_predictions} (${((cw.home_win_predictions / cw.total_predictions) * 100).toFixed(1)}%)
+- Draw: ${cw.draw_predictions} (${((cw.draw_predictions / cw.total_predictions) * 100).toFixed(1)}%)
+- Away Win: ${cw.away_win_predictions} (${((cw.away_win_predictions / cw.total_predictions) * 100).toFixed(1)}%)`;
+  };
+
+  const getDivergenceSummary = () => {
+    if (!data.divergence) return '';
+    
+    const d = data.divergence;
+    return `Model vs Crowd Analysis
+Model Prediction: ${d.modelPrediction.replace('_', ' ').toUpperCase()} (${d.modelConfidence.toFixed(1)}% confidence)
+Crowd Consensus: ${d.crowdConsensus.replace('_', ' ').toUpperCase()} (${d.crowdConfidence.toFixed(1)}% confidence)
+Divergence: ${d.divergence.toFixed(1)}%`;
+  };
 
   const getOutcomeColor = (outcome: string) => {
     switch (outcome) {
@@ -137,6 +164,14 @@ export const CrowdWisdomDisplay: React.FC<CrowdWisdomDisplayProps> = ({
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
           Crowd Wisdom ({data.crowdWisdom.total_predictions} predictions)
+          <CopyButton
+            text={getCrowdWisdomSummary()}
+            size="sm"
+            variant="ghost"
+            successMessage="Crowd wisdom summary copied"
+          >
+            <Copy className="h-4 w-4" />
+          </CopyButton>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -219,7 +254,17 @@ export const CrowdWisdomDisplay: React.FC<CrowdWisdomDisplayProps> = ({
         {/* Divergence Analysis */}
         {showDivergence && data.divergence && (
           <div className="space-y-2">
-            <h4 className="font-semibold">Model vs Crowd Analysis</h4>
+            <div className="flex items-center justify-between">
+              <h4 className="font-semibold">Model vs Crowd Analysis</h4>
+              <CopyButton
+                text={getDivergenceSummary()}
+                size="sm"
+                variant="ghost"
+                successMessage="Divergence analysis copied"
+              >
+                <Copy className="h-4 w-4" />
+              </CopyButton>
+            </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-gray-600">Model Prediction:</span>

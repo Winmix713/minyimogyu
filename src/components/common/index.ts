@@ -1,3 +1,5 @@
-export { HighValuePatternBadge, type HighValuePattern } from './HighValuePatternBadge';
-export { EmptyState } from './EmptyState';
-export { ErrorState } from './ErrorState';
+export { CopyButton } from './CopyButton';
+export type { CopyButtonProps } from './CopyButton';
+
+export { CopyBadge } from './CopyBadge';
+export type { CopyBadgeProps } from './CopyBadge';

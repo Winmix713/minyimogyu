@@ -1,10 +1,11 @@
 import { format, formatDistanceToNow } from "date-fns";
-import { Play, Loader2, FileText, Edit, Trash2, MoreHorizontal } from "lucide-react";
+import { Play, Loader2, FileText, Edit, Trash2, MoreHorizontal, Copy } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { CopyButton, CopyBadge } from "@/components/common";
 import { cn } from "@/lib/utils";
 import type { JobSummary } from "@/types/jobs";
 
@@ -141,6 +142,24 @@ export default function JobStatusCard({
             <span>Utolsó futás:</span>
             <span className="text-foreground font-medium">{formatRelative(job.last_run_at)}</span>
           </div>
+          <CopyBadge 
+            text={job.id} 
+            showIcon={true}
+            className="font-mono text-xs"
+            aria-label={`Copy job ID: ${job.id}`}
+          >
+            ID: {job.id.slice(0, 8)}...
+          </CopyBadge>
+        </div>
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <CopyBadge 
+            text={job.cron_expression} 
+            showIcon={true}
+            className="font-mono text-xs"
+            aria-label={`Copy cron expression: ${job.cron_expression}`}
+          >
+            Cron: {job.cron_expression}
+          </CopyBadge>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -169,9 +188,22 @@ export default function JobStatusCard({
               </div>
             </div>
             {job.last_log && job.last_log.status !== "running" && (
-              <p className="text-xs text-muted-foreground">
-                Utolsó futás: {job.last_log.records_processed ?? 0} rekord feldolgozva {job.last_log.duration_ms ? `(${formatDuration(job.last_log.duration_ms)})` : ""}
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  Utolsó futás: {job.last_log.records_processed ?? 0} rekord feldolgozva {job.last_log.duration_ms ? `(${formatDuration(job.last_log.duration_ms)})` : ""}
+                </p>
+                {job.last_log.message && (
+                  <CopyButton
+                    text={job.last_log.message}
+                    size="sm"
+                    variant="ghost"
+                    successMessage="Log message copied to clipboard"
+                  >
+                    <Copy className="w-3 h-3 mr-1" />
+                    Copy Log
+                  </CopyButton>
+                )}
+              </div>
             )}
           </div>
         </div>

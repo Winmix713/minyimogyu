@@ -346,19 +346,30 @@ export default function ModelsPage() {
           data: { model_type: 'retired', is_active: false } 
         });
         break;
-      case 'duplicate':
-        setForm({
-          model_name: `${model.model_name}_copy`,
-          model_version: model.model_version,
-          model_type: "challenger",
+      case 'duplicate': {
+        // Create a duplicated model with same hyperparameters but new ID
+        const duplicatedModel = {
+          model_name: `${model.model_name}_copy_${Date.now().slice(-4)}`,
+          model_version: `${model.model_version}_copy`,
+          model_type: "challenger" as const,
           algorithm: model.algorithm || "",
           hyperparameters: JSON.stringify(model.hyperparameters || {}),
           traffic_allocation: model.traffic_allocation || 10,
-          description: `${model.description || ''} (Copy)`,
+          description: `${model.description || ''} (Copy of ${model.model_name} v${model.model_version})`,
           is_active: false,
+        };
+        
+        createMutation.mutate(duplicatedModel, {
+          onSuccess: () => {
+            toast.success("Model duplicated successfully");
+          },
+          onError: (e: unknown) => {
+            const message = e instanceof Error ? e.message : "Duplication failed";
+            toast.error(message);
+          }
         });
-        setIsCreateDialogOpen(true);
         break;
+      }
     }
   };
 

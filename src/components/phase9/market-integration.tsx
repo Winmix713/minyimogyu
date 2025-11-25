@@ -13,9 +13,11 @@ import {
   AlertCircle,
   ExternalLink,
   Calculator,
-  Target
+  Target,
+  Copy
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { CopyButton } from '@/components/common';
 import { MarketIntegrationService } from '@/lib/phase9-api';
 import type { 
   MarketOdds, 
@@ -396,6 +398,17 @@ export const ValueBetHighlights: React.FC<ValueBetHighlightsProps> = ({
     return (bankroll * kellyFraction).toFixed(2);
   };
 
+  const getValueBetSummary = (bet: ValueBet) => {
+    return `Value Bet Details
+Bookmaker: ${bet.bookmaker}
+Match: ${bet.match_id}
+Bet Type: ${bet.bet_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+Odds: ${bet.odds.toFixed(2)}
+Expected Value: ${(bet.expected_value * 100).toFixed(2)}%
+Confidence: ${bet.confidence.toFixed(1)}%
+Kelly Fraction: ${(bet.kelly_fraction * 100).toFixed(2)}%`;
+  };
+
   const getTopValueBets = () => {
     return valueBets.slice(0, 5); // Top 5 for highlights
   };
@@ -507,6 +520,14 @@ export const ValueBetHighlights: React.FC<ValueBetHighlightsProps> = ({
                   </div>
                 )}
               </div>
+              <CopyButton
+                text={getValueBetSummary(valueBet)}
+                size="sm"
+                variant="ghost"
+                successMessage="Value bet details copied"
+              >
+                <Copy className="h-4 w-4" />
+              </CopyButton>
             </div>
           ))}
         </div>
