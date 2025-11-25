@@ -52,12 +52,6 @@ Key data flow:
 - Modular components in `src/components/phase9` and API layer in `src/lib/phase9-api.ts`.
 - Automated tests in `src/test/phase9.test.ts` covering core behaviors.
 
-### Copy & Clone Suite
-- Comprehensive copy and clone functionality across the platform with clipboard utilities and audit trails.
-- Clone scheduler jobs, configurations, dashboards, and reports with preview and validation.
-- Administrative copy activity monitoring with detailed audit logs and statistics.
-- **Documentation**: [Copy & Clone Suite Features](docs/features/copy-clone.md)
-
 ### Evaluation Logging & ID Tracking
 - **Robust Prediction Tracking**: Every prediction gets a unique UUIDv4 for end-to-end tracking from prediction to result reconciliation.
 - **CSV-based Event Sourcing**: Evaluation log stored as `/tmp/evaluation_log.csv` with atomic append operations for data integrity.
