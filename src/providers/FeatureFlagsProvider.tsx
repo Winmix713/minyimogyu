@@ -1,4 +1,5 @@
 import React, { createContext, useContext, ReactNode } from 'react';
+import { phaseFlags } from '@/config/env';
 
 interface FeatureFlag {
   phase5: boolean;    // Advanced pattern detection
@@ -25,11 +26,11 @@ const defaultFlags: FeatureFlag = {
 
 const loadFlagsFromEnv = (): FeatureFlag => {
   return {
-    phase5: import.meta.env.VITE_FEATURE_PHASE5 === 'true',
-    phase6: import.meta.env.VITE_FEATURE_PHASE6 === 'true',
-    phase7: import.meta.env.VITE_FEATURE_PHASE7 === 'true',
-    phase8: import.meta.env.VITE_FEATURE_PHASE8 === 'true',
-    phase9: import.meta.env.VITE_FEATURE_PHASE9 === 'true',
+    phase5: phaseFlags.phase5,
+    phase6: phaseFlags.phase6,
+    phase7: phaseFlags.phase7,
+    phase8: phaseFlags.phase8,
+    phase9: phaseFlags.phase9,
   };
 };
 

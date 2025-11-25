@@ -263,6 +263,78 @@ Coverage summaries are printed to the console and detailed HTML/LCOV reports lan
 
 ---
 
+## 🛠️ Environment Setup
+
+### Prerequisites
+
+- Node.js 18+ and npm
+- Python 3.9+ (for ML pipeline)
+- Supabase CLI (for local development)
+
+### Environment Configuration
+
+1. **Copy environment template:**
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. **Configure Supabase credentials:**
+   ```bash
+   # Required for all environments
+   VITE_SUPABASE_URL="https://your-project.supabase.co"
+   VITE_SUPABASE_ANON_KEY="your-anon-key"
+   
+   # Environment type
+   VITE_ENV="development"  # or "staging", "production"
+   ```
+
+3. **Enable Phase Features (optional):**
+   ```bash
+   # Enable specific features by setting to "true"
+   VITE_FEATURE_PHASE6="true"    # Model evaluation & feedback loop
+   VITE_FEATURE_PHASE8="true"    # Monitoring & visualization
+   VITE_FEATURE_PHASE9="true"    # Collaborative market intelligence
+   ```
+
+4. **API Origins (optional):**
+   ```bash
+   # Override default Supabase URLs if needed
+   VITE_API_ORIGIN="https://your-api.example.com"
+   VITE_EDGE_FUNCTION_ORIGIN="https://your-project.supabase.co/functions/v1"
+   ```
+
+### Local Development with Docker Supabase
+
+For local development, you can use the Docker Compose setup:
+
+```bash
+# Start local Supabase
+docker-compose -f docker-compose.yml up -d
+
+# Update .env.local for local development
+VITE_SUPABASE_URL="http://localhost:54321"
+VITE_SUPABASE_ANON_KEY="your-local-anon-key"
+VITE_ENV="development"
+```
+
+### Environment Validation
+
+The application validates all required environment variables at startup. Missing or invalid variables will prevent the app from loading and show detailed error messages in development mode.
+
+### Feature Flags
+
+Phase-based features are controlled by environment variables:
+
+| Phase | Feature | Variable | Description |
+|-------|---------|----------|-------------|
+| 5 | Pattern Detection | `VITE_FEATURE_PHASE5` | Advanced pattern detection algorithms |
+| 6 | Model Evaluation | `VITE_FEATURE_PHASE6` | Model performance and feedback loops |
+| 7 | Cross-League | `VITE_FEATURE_PHASE7` | Multi-league intelligence |
+| 8 | Monitoring | `VITE_FEATURE_PHASE8` | System monitoring and visualization |
+| 9 | Collaborative AI | `VITE_FEATURE_PHASE9` | Market intelligence and self-improvement |
+
+---
+
 ## 🔮 Prediction Engine
 
 The repository now ships with `prediction_engine.py`, a standalone inference harness that powers both the CLI tooling and any future server-side integrations. The engine performs strict feature validation against `model_config.yaml`, resolves the active serialized model from `models/model_registry.json`, and keeps the hydrated estimator cached via a singleton so disk I/O occurs only on the very first request. Every successful inference automatically records a row via `ml_logging.log_prediction_event`, ensuring downstream analytics (or audits) always have a traceable prediction ID.
