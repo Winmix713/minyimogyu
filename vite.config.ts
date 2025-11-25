@@ -3,11 +3,27 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
+// Determine if we're using local Supabase
+const isLocalDev = process.env.VITE_SUPABASE_URL?.includes("localhost");
+const supabaseUrl = process.env.VITE_SUPABASE_URL || "http://localhost:54321";
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // Proxy configuration for local Supabase development
+    // Routes /functions/v1/* to the local Supabase edge functions runtime
+    // For hosted environments, this proxy is disabled and requests go directly to the hosted Supabase URL
+    proxy: isLocalDev
+      ? {
+          "/functions/v1": {
+            target: supabaseUrl,
+            changeOrigin: true,
+            rewrite: (path) => path, // Keep the path as-is
+          },
+        }
+      : {},
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
