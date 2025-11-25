@@ -173,23 +173,79 @@ Optional OAuth providers can be configured in the Supabase dashboard under Authe
 
 ## 🛠️ Local Development
 
-### Prerequisites
+### Quick Start with Docker (Recommended)
+
+The easiest way to get a fully working local environment is to use the automated bootstrap script with Docker:
+
+```bash
+# Make executable (macOS/Linux)
+chmod +x scripts/dev/bootstrap.sh
+
+# Run the bootstrap script
+scripts/dev/bootstrap.sh
+
+# On Windows (PowerShell)
+powershell -ExecutionPolicy Bypass -File scripts/dev/bootstrap.sh
+```
+
+This will:
+- ✅ Check prerequisites (Docker, Node.js, npm)
+- ✅ Set up environment files (`.env.local`, `docker/.env`)
+- ✅ Start Docker containers (Postgres, Supabase, pgAdmin)
+- ✅ Install npm dependencies
+- ✅ Run database migrations and seeds
+- ✅ Start the Vite development server
+
+**Services will be available at:**
+- Frontend: http://localhost:8080
+- Supabase: http://localhost:54321
+- Postgres: localhost:5432
+- pgAdmin: http://localhost:5050
+
+For detailed setup instructions, troubleshooting, and manual setup steps, see [docs/development/local.md](docs/development/local.md).
+
+### Manual Setup
+
+If you prefer to set up manually or use an existing Supabase project:
+
+**Prerequisites:**
 - Node.js 18+
 - npm or bun
-- Supabase project (or Supabase CLI) configured with the matching schema & Edge Functions.
+- Supabase project (hosted or Supabase CLI for local development)
 
-### Setup
-```bash
-npm install
-npm run dev
-```
-- Copy `.env.example` to `.env` and configure with your Supabase credentials.
-- Start the Vite dev server at `http://localhost:5173`.
-- Ensure Supabase Edge Functions (`supabase/functions/*`) are deployed or running via `supabase functions serve` when testing job and analytics features locally.
-- Apply database migrations including the new `user_profiles` table:
-  ```bash
-  supabase db push --project-ref <YOUR_PROJECT_ID>
-  ```
+**Steps:**
+
+1. Copy environment template and configure:
+   ```bash
+   cp .env.local.template .env.local
+   ```
+   
+2. For local Docker-based Supabase, ensure containers are running:
+   ```bash
+   docker-compose up -d
+   ```
+
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+4. Run database migrations and seeds:
+   ```bash
+   npm run seed:database
+   ```
+
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+6. (Optional) Run Edge Functions locally:
+   ```bash
+   supabase functions serve --no-verify-jwt
+   ```
+
+The Vite proxy will automatically route `/functions/v1/*` requests to the local Supabase instance, allowing you to develop and test edge functions without leaving your editor.
 
 ### Testing
 
