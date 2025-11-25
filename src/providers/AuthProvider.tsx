@@ -23,6 +23,10 @@ export interface AuthContextType {
   signUp: (email: string, password: string, fullName?: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  hasRole: (role: UserRole) => boolean;
+  hasAnyRole: (roles: UserRole[]) => boolean;
+  isAdmin: () => boolean;
+  isAnalyst: () => boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -178,6 +182,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [toast]);
 
+  // Role-based access helpers
+  const hasRole = useCallback((role: UserRole): boolean => {
+    return profile?.role === role;
+  }, [profile]);
+
+  const hasAnyRole = useCallback((roles: UserRole[]): boolean => {
+    return profile ? roles.includes(profile.role) : false;
+  }, [profile]);
+
+  const isAdmin = useCallback((): boolean => {
+    return hasRole('admin');
+  }, [hasRole]);
+
+  const isAnalyst = useCallback((): boolean => {
+    return hasRole('analyst');
+  }, [hasRole]);
+
   const value: AuthContextType = {
     user,
     session,
@@ -187,6 +208,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signUp,
     signOut,
     refreshProfile,
+    hasRole,
+    hasAnyRole,
+    isAdmin,
+    isAnalyst,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
