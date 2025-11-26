@@ -8,7 +8,8 @@ import LeagueComparisonRadarChart, { LeagueRadarMetric } from "@/components/cros
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Brain, Network, Radar, RefreshCcw } from "lucide-react";
+import { Brain, Network, Radar, RefreshCcw, Copy } from "lucide-react";
+import { CopyButton, CopyBadge } from "@/components/common";
 
 interface LeagueRow { id: string; name: string; }
 
@@ -158,6 +159,15 @@ const CrossLeague = () => {
                 </Badge>
               ))}
             </div>
+            <CopyButton
+              text={selected.join(', ')}
+              variant="outline"
+              size="sm"
+              successMessage="Selected leagues copied to clipboard"
+            >
+              <Copy className="w-4 h-4 mr-2" />
+              Copy Selection
+            </CopyButton>
             <Button variant="ghost" size="sm" onClick={() => analyzeQuery.refetch()} className="ml-auto">
               <RefreshCcw className="w-4 h-4 mr-2" /> Frissítés
             </Button>
@@ -179,6 +189,19 @@ const CrossLeague = () => {
               </CardHeader>
               <CardContent>
                 <CorrelationHeatmap labels={heatmap.labels ?? []} matrix={heatmap.matrix ?? []} />
+                {heatmapQuery.data?.correlations && heatmapQuery.data.correlations.length > 0 && (
+                  <div className="mt-4 flex justify-end">
+                    <CopyButton
+                      text={JSON.stringify(heatmapQuery.data.correlations, null, 2)}
+                      size="sm"
+                      variant="outline"
+                      successMessage="Correlation data copied to clipboard"
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Export Correlations
+                    </CopyButton>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -191,9 +214,21 @@ const CrossLeague = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {(metaPatternsQuery.data?.meta_patterns ?? []).map((mp: MetaPatternRow) => (
                   <div key={`${mp.pattern_name}-${mp.pattern_type}`} className="p-4 rounded-lg ring-1 ring-border bg-card">
-                    <div className="font-semibold">{mp.pattern_name}</div>
-                    <div className="text-xs text-muted-foreground mt-1">Típus: {mp.pattern_type} • Evidence: {mp.evidence_strength}%</div>
-                    <div className="text-sm mt-2">{mp.pattern_description}</div>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="font-semibold">{mp.pattern_name}</div>
+                        <div className="text-xs text-muted-foreground mt-1">Típus: {mp.pattern_type} • Evidence: {mp.evidence_strength}%</div>
+                        <div className="text-sm mt-2">{mp.pattern_description}</div>
+                      </div>
+                      <CopyButton
+                        text={`${mp.pattern_name}\nType: ${mp.pattern_type}\nEvidence: ${mp.evidence_strength}%\nDescription: ${mp.pattern_description || 'N/A'}`}
+                        size="sm"
+                        variant="ghost"
+                        successMessage="Meta pattern insight copied"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </CopyButton>
+                    </div>
                   </div>
                 ))}
                 {(!metaPatternsQuery.data?.meta_patterns || metaPatternsQuery.data.meta_patterns.length === 0) && (

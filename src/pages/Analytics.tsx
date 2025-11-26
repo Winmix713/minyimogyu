@@ -3,6 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import ModelPerformanceChart, { PerformancePoint } from "@/components/analytics/ModelPerformanceChart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Copy, Download } from "lucide-react";
+import { CopyButton } from "@/components/common";
 import PageLayout from "@/components/layout/PageLayout";
 import PageHeader from "@/components/layout/PageHeader";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
@@ -110,6 +113,22 @@ export default function Analytics() {
     }
   }
 
+  const copySummaryToClipboard = () => {
+    const summaryText = `Analytics Summary
+Total Evaluations: ${summary.total}
+Accuracy: ${summary.accuracy}%
+Average Calibration Error: ${summary.avgCalibrationError}
+CSS Score Count: ${cssScoreCount}
+Date Range: Last 30 days`;
+    
+    return summaryText;
+  };
+
+  const copyPerformanceDataToClipboard = () => {
+    const performanceData = JSON.stringify(points, null, 2);
+    return performanceData;
+  };
+
   if (loading) {
     return (
       <PageLayout>
@@ -129,12 +148,45 @@ export default function Analytics() {
 
   return (
     <PageLayout>
-      <PageHeader title="Analytics" description="Hosszú távú modell teljesítmény, kalibráció, összehasonlítás" />
+      <PageHeader 
+        title="Analytics" 
+        description="Hosszú távú modell teljesítmény, kalibráció, összehasonlítás"
+        actions={(
+          <div className="flex gap-2">
+            <CopyButton
+              text={copySummaryToClipboard()}
+              variant="outline"
+              successMessage="Analytics summary copied to clipboard"
+            >
+              <Copy className="w-4 h-4 mr-2" />
+              Copy Summary
+            </CopyButton>
+            <CopyButton
+              text={copyPerformanceDataToClipboard()}
+              variant="outline"
+              successMessage="Performance data copied to clipboard"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export JSON
+            </CopyButton>
+          </div>
+        )}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Card className="glass-card border-border">
           <CardHeader>
-            <CardTitle>Összes értékelt predikció</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Összes értékelt predikció</CardTitle>
+              <CopyButton
+                text={summary.total.toString()}
+                size="sm"
+                variant="ghost"
+                successMessage="Total evaluations copied"
+              >
+                <Copy className="w-3 h-3 mr-1" />
+              </CopyButton>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{summary.total}</div>
@@ -142,7 +194,17 @@ export default function Analytics() {
         </Card>
         <Card className="glass-card border-border">
           <CardHeader>
-            <CardTitle>Összpontosság</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Összpontosság</CardTitle>
+              <CopyButton
+                text={`${summary.accuracy}%`}
+                size="sm"
+                variant="ghost"
+                successMessage="Accuracy copied"
+              >
+                <Copy className="w-3 h-3 mr-1" />
+              </CopyButton>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{summary.accuracy}%</div>
@@ -150,7 +212,17 @@ export default function Analytics() {
         </Card>
         <Card className="glass-card border-border">
           <CardHeader>
-            <CardTitle>Átlagos kalibrációs hiba</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Átlagos kalibrációs hiba</CardTitle>
+              <CopyButton
+                text={summary.avgCalibrationError.toString()}
+                size="sm"
+                variant="ghost"
+                successMessage="Calibration error copied"
+              >
+                <Copy className="w-3 h-3 mr-1" />
+              </CopyButton>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{summary.avgCalibrationError}</div>
