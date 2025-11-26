@@ -178,7 +178,7 @@ const RunningJobsPage = () => {
         </Card>
       );
     });
-  }, [isLoading, jobs, isStarting, startingJobName, isStopping, stoppingJobId, isFetching]);
+  }, [isLoading, jobs, isStarting, startingJobName, isStopping, stoppingJobId, isFetching, handleStart]);
 
   return (
     <AdminLayout

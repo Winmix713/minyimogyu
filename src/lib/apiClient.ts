@@ -117,7 +117,7 @@ export class SupabaseClient {
     table: T,
     options: {
       columns?: string;
-      filter?: Record<string, any>;
+      filter?: Record<string, unknown>;
       orderBy?: { column: string; ascending?: boolean };
       limit?: number;
       offset?: number;

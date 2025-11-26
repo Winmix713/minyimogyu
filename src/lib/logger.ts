@@ -19,7 +19,6 @@ function emit(level: LogLevel, message: string, data?: Record<string, unknown>, 
     timestamp: new Date().toISOString(),
   };
 
-  // eslint-disable-next-line no-console
   const c = console;
   if (level === "debug" && !isDev) return;
 

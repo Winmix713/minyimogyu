@@ -143,7 +143,7 @@ const Sidebar: React.FC = () => {
   // Filter navigation items based on user permissions and phase flags
   const filteredItems = navigationItems.filter(item => {
     // Check role requirements
-    if (item.requiredRoles && !hasAnyRole(item.requiredRoles as any)) {
+    if (item.requiredRoles && !hasAnyRole(item.requiredRoles)) {
       return false;
     }
 

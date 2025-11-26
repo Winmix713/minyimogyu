@@ -6,6 +6,8 @@ import { FeatureFlagsProvider } from '@/providers/FeatureFlagsProvider';
 import AppRoutes from '@/components/AppRoutes';
 import PageLoading from '@/components/ui/PageLoading';
 import { vi } from 'vitest';
+import { useRequireAuth, useRequireRole } from '@/hooks/useAuth';
+import { usePhaseFlags } from '@/hooks/usePhaseFlags';
 
 // Mock the hooks
 vi.mock('@/hooks/useAuth', () => ({
@@ -70,7 +72,6 @@ describe('AppRoutes', () => {
   });
 
   it('renders protected routes when authenticated', () => {
-    const { useRequireAuth } = require('@/hooks/useAuth');
     useRequireAuth.mockReturnValue({ loading: false, authenticated: true });
     
     renderWithProviders(<AppRoutes />);
@@ -78,7 +79,6 @@ describe('AppRoutes', () => {
   });
 
   it('shows loading state while checking permissions', () => {
-    const { useRequireRole } = require('@/hooks/useAuth');
     useRequireRole.mockReturnValue({ loading: true, authorized: false });
     
     renderWithProviders(<AppRoutes />);
@@ -86,7 +86,6 @@ describe('AppRoutes', () => {
   });
 
   it('respects phase flags for conditional routes', () => {
-    const { usePhaseFlags } = require('@/hooks/usePhaseFlags');
     usePhaseFlags.mockReturnValue({
       isPhase5Enabled: true,
       isPhase6Enabled: false,
@@ -101,7 +100,6 @@ describe('AppRoutes', () => {
   });
 
   it('applies role-based access control', () => {
-    const { useRequireRole } = require('@/hooks/useAuth');
     useRequireRole.mockImplementation((roles) => {
       if (roles && roles.includes('admin')) {
         return { loading: false, authorized: false, error: 'Requires admin role' };
