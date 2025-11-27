@@ -8,6 +8,8 @@ import { useRequireAuth, useRequireRole } from '@/hooks/useAuth';
 import { usePhaseFlags } from '@/hooks/usePhaseFlags';
 import AppRoutes from '@/components/AppRoutes';
 import { vi } from 'vitest';
+import { useRequireAuth, useRequireRole } from '@/hooks/useAuth';
+import { usePhaseFlags } from '@/hooks/usePhaseFlags';
 
 // Mock the hooks
 vi.mock('@/hooks/useAuth', () => ({

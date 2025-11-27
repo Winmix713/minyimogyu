@@ -23,7 +23,6 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       this.props.onError(error, errorInfo);
     }
     if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
       console.error("[ErrorBoundary]", error, errorInfo);
     }
   }

@@ -5,6 +5,7 @@ import React, { ReactNode } from 'react';
 import { AuthProvider, AuthContext } from '@/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { vi } from 'vitest';
+import { supabase } from '@/integrations/supabase/client';
 
 // Mock Supabase client
 vi.mock('@/integrations/supabase/client', () => ({

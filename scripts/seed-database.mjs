@@ -5,7 +5,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  // eslint-disable-next-line no-console
+   
   console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables');
   process.exit(1);
 }
@@ -179,13 +179,13 @@ async function main() {
   if (!FORCE) {
     const { data, error } = await supabase.from('leagues').select('id').limit(1);
     if (!error && data && data.length > 0) {
-      // eslint-disable-next-line no-console
+       
       console.log('Leagues already exist - skipping seed (use --force to override)');
       return;
     }
   }
 
-  // eslint-disable-next-line no-console
+   
   console.log(DRY_RUN ? '[DRY RUN] Starting database seed' : 'Starting database seed');
 
   await ensurePhase9Settings();
@@ -196,12 +196,12 @@ async function main() {
   await seedPredictions(matches || []);
   await seedModelPerformance();
 
-  // eslint-disable-next-line no-console
+   
   console.log('Database seed completed');
 }
 
 main().catch((e) => {
-  // eslint-disable-next-line no-console
+   
   console.error('Seed failed:', e);
   process.exit(1);
 });
