@@ -1,8 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React, { ReactNode } from 'react';
 import { AuthProvider, AuthContext } from '@/providers/AuthProvider';
-import { ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { vi } from 'vitest';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -200,7 +201,6 @@ describe('AuthProvider', () => {
 
   it('handles sign out functionality', async () => {
     const user = userEvent.setup();
-    
     supabase.auth.signOut.mockResolvedValue({ error: null });
     
     supabase.auth.onAuthStateChange.mockReturnValue({

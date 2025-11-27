@@ -502,6 +502,3 @@ const getDaysSinceUpdate = (lastUpdated: string): number => {
   const diffTime = Math.abs(now.getTime() - updated.getTime());
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
-
-// Import supabase client for the indicator component
-import { supabase } from '@/integrations/supabase/client';

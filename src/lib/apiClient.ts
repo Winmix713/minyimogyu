@@ -18,6 +18,8 @@ export interface EdgeFunctionOptions {
   timeout?: number;
 }
 
+type SupabaseFilterValue = string | number | boolean | null;
+
 // Default timeout for edge function calls (10 seconds)
 const DEFAULT_TIMEOUT = 10000;
 
@@ -117,7 +119,7 @@ export class SupabaseClient {
     table: T,
     options: {
       columns?: string;
-      filter?: Record<string, unknown>;
+      filter?: Record<string, SupabaseFilterValue>;
       orderBy?: { column: string; ascending?: boolean };
       limit?: number;
       offset?: number;

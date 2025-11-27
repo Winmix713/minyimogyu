@@ -2,6 +2,7 @@ import { Home, Users, Calendar as CalendarIcon, Trophy, Settings, Sparkles, Cloc
 import { NavLink, useLocation } from "react-router-dom";
 import { usePhaseFlags } from "@/hooks/usePhaseFlags";
 import { useAuth } from "@/hooks/useAuth";
+import type { UserRole } from "@/providers/AuthProvider";
 import { cn } from "@/lib/utils";
 import React from "react";
 
@@ -38,7 +39,7 @@ interface NavItem {
   key: IconKey;
   to: string;
   label: string;
-  requiredRoles?: string[];
+  requiredRoles?: UserRole[];
   phase?: number;
   isDivider?: boolean;
 }

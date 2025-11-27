@@ -1,29 +1,35 @@
 import { render, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { FeatureFlagsProvider } from '@/providers/FeatureFlagsProvider';
+import { useRequireAuth, useRequireRole } from '@/hooks/useAuth';
+import { usePhaseFlags } from '@/hooks/usePhaseFlags';
 import AppRoutes from '@/components/AppRoutes';
-import PageLoading from '@/components/ui/PageLoading';
 import { vi } from 'vitest';
 import { useRequireAuth, useRequireRole } from '@/hooks/useAuth';
 import { usePhaseFlags } from '@/hooks/usePhaseFlags';
 
 // Mock the hooks
 vi.mock('@/hooks/useAuth', () => ({
-  useRequireAuth: () => ({ loading: false, authenticated: true }),
-  useRequireRole: () => ({ loading: true, authorized: false }),
+  useRequireAuth: vi.fn(() => ({ loading: false, authenticated: true })),
+  useRequireRole: vi.fn(() => ({ loading: true, authorized: false })),
 }));
 
 vi.mock('@/hooks/usePhaseFlags', () => ({
-  usePhaseFlags: () => ({
+  usePhaseFlags: vi.fn(() => ({
     isPhase5Enabled: false,
     isPhase6Enabled: false,
     isPhase7Enabled: false,
     isPhase8Enabled: false,
     isPhase9Enabled: false,
-  }),
+  })),
 }));
+
+const useRequireAuthMock = vi.mocked(useRequireAuth);
+const useRequireRoleMock = vi.mocked(useRequireRole);
+const usePhaseFlagsMock = vi.mocked(usePhaseFlags);
 
 // Mock lazy components
 vi.mock('@/pages/Index', () => ({
@@ -45,7 +51,7 @@ const createTestQueryClient = () => new QueryClient({
   },
 });
 
-const renderWithProviders = (component: React.ReactElement) => {
+const renderWithProviders = (component: ReactElement) => {
   const queryClient = createTestQueryClient();
   
   return render(
@@ -72,21 +78,21 @@ describe('AppRoutes', () => {
   });
 
   it('renders protected routes when authenticated', () => {
-    useRequireAuth.mockReturnValue({ loading: false, authenticated: true });
+    useRequireAuthMock.mockReturnValue({ loading: false, authenticated: true });
     
     renderWithProviders(<AppRoutes />);
     expect(screen.getByText('Index Page')).toBeInTheDocument();
   });
 
   it('shows loading state while checking permissions', () => {
-    useRequireRole.mockReturnValue({ loading: true, authorized: false });
+    useRequireRoleMock.mockReturnValue({ loading: true, authorized: false });
     
     renderWithProviders(<AppRoutes />);
     expect(screen.getByText('Checking permissions...')).toBeInTheDocument();
   });
 
   it('respects phase flags for conditional routes', () => {
-    usePhaseFlags.mockReturnValue({
+    usePhaseFlagsMock.mockReturnValue({
       isPhase5Enabled: true,
       isPhase6Enabled: false,
       isPhase7Enabled: false,
@@ -100,7 +106,7 @@ describe('AppRoutes', () => {
   });
 
   it('applies role-based access control', () => {
-    useRequireRole.mockImplementation((roles) => {
+    useRequireRoleMock.mockImplementation((roles) => {
       if (roles && roles.includes('admin')) {
         return { loading: false, authorized: false, error: 'Requires admin role' };
       }
