@@ -36,7 +36,7 @@ const ToastPortal: React.FC<ToastPortalProps> = ({
       className
     )}>
       <SonnerToaster
-        position={position.replace('-', ' ') as any}
+        position={position}
         maxToasts={maxToasts}
         richColors={richColors}
         expand={expand}

@@ -67,7 +67,7 @@ export function useEdgeFunction<T = unknown>(
 /**
  * Hook for querying data from edge functions
  */
-export function useEdgeFunctionQuery<T = any>({
+export function useEdgeFunctionQuery<T = unknown>({
   functionName,
   options,
   onSuccess,
