@@ -1,8 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React, { ReactNode } from 'react';
 import { AuthProvider, AuthContext } from '@/providers/AuthProvider';
-import { ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { vi } from 'vitest';
 
 // Mock Supabase client
@@ -86,8 +87,6 @@ describe('AuthProvider', () => {
       updated_at: '2023-01-01T00:00:00Z',
     };
 
-    const { supabase } = require('@/integrations/supabase/client');
-    
     // Mock session and profile
     supabase.auth.getSession.mockResolvedValue({
       data: { session: { user: mockUser } },
@@ -143,8 +142,6 @@ describe('AuthProvider', () => {
       created_at: '2023-01-01T00:00:00Z',
     };
 
-    const { supabase } = require('@/integrations/supabase/client');
-    
     supabase.auth.signInWithPassword.mockResolvedValue({
       data: { user: mockUser },
       error: null,
@@ -203,8 +200,6 @@ describe('AuthProvider', () => {
 
   it('handles sign out functionality', async () => {
     const user = userEvent.setup();
-    const { supabase } = require('@/integrations/supabase/client');
-    
     supabase.auth.signOut.mockResolvedValue({ error: null });
     
     supabase.auth.onAuthStateChange.mockReturnValue({

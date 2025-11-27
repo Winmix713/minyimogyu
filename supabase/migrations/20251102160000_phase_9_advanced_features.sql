@@ -78,7 +78,7 @@ COMMENT ON COLUMN public.market_odds.bookmaker IS 'Name of the bookmaker offerin
 COMMENT ON COLUMN public.market_odds.api_source IS 'Which external API provided these odds';
 
 CREATE INDEX idx_market_odds_match ON public.market_odds(match_id);
-CREATE INDEX idx_market_odds_last_updated ON public.market_odds(last_updated_at DESC);
+CREATE INDEX idx_market_odds_last_updated ON public.market_odds(last_updated DESC);
 CREATE INDEX idx_market_odds_bookmaker ON public.market_odds(bookmaker);
 
 -- 4. Value bets table
