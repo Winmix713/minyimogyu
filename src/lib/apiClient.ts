@@ -16,6 +16,7 @@ export interface EdgeFunctionOptions {
   body?: unknown;
   headers?: Record<string, string>;
   timeout?: number;
+  params?: Record<string, string | number | undefined>;
 }
 
 type SupabaseFilterValue = string | number | boolean | null;
@@ -35,6 +36,7 @@ export async function callEdgeFunction<T = unknown>(
     body,
     headers = {},
     timeout = DEFAULT_TIMEOUT,
+    params,
   } = options;
 
   try {
@@ -59,11 +61,24 @@ export async function callEdgeFunction<T = unknown>(
       requestHeaders.Authorization = `Bearer ${session.access_token}`;
     }
 
+    // Build query string for GET requests
+    let queryString = '';
+    if (params && method === 'GET') {
+      const queryParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
+        }
+      });
+      queryString = queryParams.toString();
+    }
+
     // Make the request
     const { data, error } = await supabase.functions.invoke<T>(functionName, {
       body,
       headers: requestHeaders,
       method,
+      ...(queryString && { query: queryString }),
     });
 
     clearTimeout(timeoutId);

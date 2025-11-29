@@ -34,6 +34,7 @@ const EnvVariables = React.lazy(() => import('@/pages/EnvVariables'));
 const ScheduledJobsPage = React.lazy(() => import('@/pages/ScheduledJobsPage'));
 const ModelsPage = React.lazy(() => import('@/pages/ModelsPage'));
 const MonitoringPage = React.lazy(() => import('@/pages/MonitoringPage'));
+const PredictionAnalyzerPage = React.lazy(() => import('@/pages/PredictionAnalyzerPage'));
 
 // Lazy load admin components
 const AdminDashboard = React.lazy(() => import('@/pages/admin/AdminDashboard'));
@@ -194,6 +195,13 @@ const AppRoutes: React.FC = () => {
             <ProtectedRoute>
               <Suspense fallback={<PageLoading message="Loading monitoring..." />}>
                 <MonitoringPage />
+              </Suspense>
+            </ProtectedRoute>
+          } />
+          <Route path="/prediction-analyzer" element={
+            <ProtectedRoute>
+              <Suspense fallback={<PageLoading message="Loading prediction analyzer..." />}>
+                <PredictionAnalyzerPage />
               </Suspense>
             </ProtectedRoute>
           } />

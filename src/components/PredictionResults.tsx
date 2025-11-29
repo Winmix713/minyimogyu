@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp, Star } from "lucide-react";
 import { useState } from "react";
 import FeedbackForm from "./FeedbackForm";
 
@@ -16,12 +16,21 @@ interface PredictionSummary {
   was_correct?: boolean | null;
 }
 
+interface ValueRankingData {
+  value_score: number;
+  is_featured: boolean;
+  home_xg?: number;
+  away_xg?: number;
+  btts_probability?: number;
+}
+
 interface PredictionResultItem {
   match: { home: string; away: string };
   matchId: string;
   prediction?: PredictionSummary;
   patterns: PatternDisplay[];
   formScores?: { home: number; away: number };
+  value_ranking?: ValueRankingData;
 }
 
 interface PredictionResultsProps {
@@ -37,14 +46,27 @@ const PredictionResults = ({ predictions }: PredictionResultsProps) => {
     setExpandedIndex(null);
   };
 
+  // Sort predictions by value score (descending) if available
+  const sortedPredictions = [...predictions].sort((a, b) => {
+    const aScore = a.value_ranking?.value_score ?? 0;
+    const bScore = b.value_ranking?.value_score ?? 0;
+    return bScore - aScore;
+  });
+
   return (
     <div className="glass-card rounded-3xl p-6 animate-fade-in mt-8">
-      <h3 className="text-2xl font-bold text-white mb-6 text-center">
-        Predikciós Eredmények
-      </h3>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-2xl font-bold text-white">
+          Predikciós Eredmények
+        </h3>
+        <div className="flex items-center gap-2 text-xs text-blue-300">
+          <Star className="w-4 h-4" />
+          <span>Top 2 értékajánlat (Value Betting)</span>
+        </div>
+      </div>
       
       <div className="grid gap-4">
-        {predictions.map((pred, index) => {
+        {sortedPredictions.map((pred, index) => {
           const match = pred.match;
           const prediction = pred.prediction;
           const patternList = pred.patterns ?? [];
@@ -71,8 +93,18 @@ const PredictionResults = ({ predictions }: PredictionResultsProps) => {
 
           const drawProb = Math.max(0, 100 - homeProb - awayProb);
 
+          const isFeatured = pred.value_ranking?.is_featured ?? false;
+          const valueScore = pred.value_ranking?.value_score ?? 0;
+
           return (
-            <div key={index} className="glass-card-hover rounded-2xl p-5">
+            <div key={index} className={`glass-card-hover rounded-2xl p-5 relative ${isFeatured ? 'ring-2 ring-yellow-400/50 bg-yellow-500/5' : ''}`}>
+              {isFeatured && (
+                <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-500/20 border border-yellow-400/30">
+                  <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                  <span className="text-xs font-semibold text-yellow-300">Ajánlott</span>
+                </div>
+              )}
+              
               <div className="flex items-center justify-between mb-4">
                 <div className="flex-1 text-center">
                   <p className="font-bold text-white">{match.home}</p>
@@ -90,6 +122,34 @@ const PredictionResults = ({ predictions }: PredictionResultsProps) => {
                   )}
                 </div>
               </div>
+
+              {/* Value Betting Info */}
+              {valueScore > 0 && (
+                <div className="mb-4 p-3 rounded-lg bg-blue-500/10 border border-blue-400/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-blue-300 mb-1">Value Score</p>
+                      <p className="text-lg font-bold text-blue-400">{valueScore.toFixed(2)}</p>
+                    </div>
+                    {pred.value_ranking?.home_xg !== undefined && pred.value_ranking?.away_xg !== undefined && (
+                      <div className="text-right">
+                        <p className="text-xs text-blue-300">Várható gólok</p>
+                        <p className="text-sm text-blue-400 font-semibold">
+                          {pred.value_ranking.home_xg.toFixed(1)} - {pred.value_ranking.away_xg.toFixed(1)}
+                        </p>
+                      </div>
+                    )}
+                    {pred.value_ranking?.btts_probability !== undefined && (
+                      <div className="text-right">
+                        <p className="text-xs text-blue-300">BTTS %</p>
+                        <p className="text-sm text-blue-400 font-semibold">
+                          {Math.round(pred.value_ranking.btts_probability)}%
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Confidence Bar */}
               <div className="mb-4">

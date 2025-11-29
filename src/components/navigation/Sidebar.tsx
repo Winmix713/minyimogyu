@@ -1,4 +1,4 @@
-import { Home, Users, Calendar as CalendarIcon, Trophy, Settings, Sparkles, Clock, Brain, LayoutDashboard, ListChecks, LineChart, FlaskConical, Network, Activity, Shield, Key, Bot, Gauge, BarChart3 } from "lucide-react";
+import { Home, Users, Calendar as CalendarIcon, Trophy, Settings, Sparkles, Clock, Brain, LayoutDashboard, ListChecks, LineChart, FlaskConical, Network, Activity, Shield, Key, Bot, Gauge, BarChart3, TrendingUp } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { usePhaseFlags } from "@/hooks/usePhaseFlags";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,6 +30,7 @@ const iconMap = {
   modelStatus: Gauge,
   adminEnvironment: Key,
   adminDashboard: BarChart3,
+  predictionAnalyzer: TrendingUp,
 } as const;
 
 type IconKey = keyof typeof iconMap;
@@ -61,6 +62,7 @@ const navigationItems: NavItem[] = [
   { key: 'models', to: '/models', label: 'Models', phase: 6 },
   { key: 'crossleague', to: '/crossleague', label: 'Cross-League', phase: 7 },
   { key: 'monitoring', to: '/monitoring', label: 'Monitoring', phase: 8 },
+  { key: 'predictionAnalyzer', to: '/prediction-analyzer', label: 'Prediction Analyzer', phase: 8 },
   { key: 'leagues', to: '/leagues', label: 'Leagues' },
   { key: 'phase9', to: '/phase9', label: 'Phase 9', phase: 9 },
   

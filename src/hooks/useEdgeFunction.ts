@@ -239,3 +239,30 @@ export const useAdminPredictionReview = () => useEdgeFunctionQuery({
   functionName: 'admin-prediction-review',
   options: { method: 'GET' },
 });
+
+// Prediction Analyzer
+export const usePredictionAnalyzer = (params?: {
+  metric?: 'accuracy_trends' | 'league_breakdown' | 'confidence_calibration';
+  start_date?: string;
+  end_date?: string;
+  league?: string;
+}) => useEdgeFunctionQuery({
+  functionName: 'prediction-analyzer',
+  options: { 
+    method: 'GET',
+    params: params,
+  },
+});
+
+// Value Ranking for predictions
+export const useValueRankedPredictions = (matchIds?: string[]) => useEdgeFunctionQuery({
+  functionName: 'get-predictions',
+  options: {
+    method: 'GET',
+    params: {
+      value_ranking: 'true',
+      match_ids: matchIds?.join(','),
+    },
+  },
+  enabled: matchIds && matchIds.length > 0,
+});
