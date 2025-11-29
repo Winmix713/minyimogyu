@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { FeatureFlagsProvider, useFeatureFlags } from '@/providers/FeatureFlagsProvider';
+import { FeatureFlagsProvider } from '@/providers/FeatureFlagsProvider';
+import { useFeatureFlags } from '@/providers/useFeatureFlags';
 import { usePhaseFlags } from '@/hooks/usePhaseFlags';
 
 // Test component to access hooks

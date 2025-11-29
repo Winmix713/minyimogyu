@@ -1,4 +1,4 @@
-import { useFeatureFlags } from '@/providers/FeatureFlagsProvider';
+import { useFeatureFlags } from '@/providers/useFeatureFlags';
 
 export const usePhaseFlags = () => {
   const { isEnabled } = useFeatureFlags();

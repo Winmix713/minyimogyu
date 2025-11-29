@@ -12,8 +12,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
-  useSidebar,
 } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar.hooks";
 import { useAdminAuth } from "@/hooks/admin/useAdminAuth";
 import { useAuth } from "@/hooks/useAuth";
 import { NAV_SECTIONS } from "./AdminNav.constants";

@@ -1,4 +1,4 @@
-import { createContext, useCallback, type ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
 import { useLocalStorage } from "@/winmixpro/hooks/useLocalStorage";
 import { STORAGE_KEYS } from "@/winmixpro/lib/constants";
 import {
@@ -11,21 +11,9 @@ import {
   validateConfig,
 } from "@/winmixpro/lib/feature-flags";
 import type { FeatureFlag, FeatureFlagsConfig } from "@/winmixpro/types";
+import { FeatureFlagsContext, FeatureFlagsContextValue } from "./FeatureFlagsContext";
 
-interface FeatureFlagsContextValue {
-  flags: FeatureFlag[];
-  config: FeatureFlagsConfig;
-  isEnabled: (flagId: string) => boolean;
-  getValue: <T = unknown>(flagId: string, metadataKey?: string) => T | undefined;
-  toggleFlag: (flagId: string) => void;
-  updateFlag: (flagId: string, updates: Partial<FeatureFlag>) => void;
-  exportFlags: () => string;
-  importFlags: (jsonString: string) => { success: boolean; errors?: string[] };
-  resetFlags: () => void;
-  getByCategory: (category: FeatureFlag["category"]) => FeatureFlag[];
-}
-
-export const FeatureFlagsContext = createContext<FeatureFlagsContextValue | null>(null);
+export { FeatureFlagsContext };
 
 interface FeatureFlagsProviderProps {
   children: ReactNode;

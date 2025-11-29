@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ interface PredictionConfidenceChartProps {
   className?: string;
 }
 
-export function PredictionConfidenceChart({ className }: PredictionConfidenceChartProps) {
+export const PredictionConfidenceChart = memo(function PredictionConfidenceChart({ className }: PredictionConfidenceChartProps) {
   const [windowDays, setWindowDays] = useState(7);
 
   const { data: analytics, isLoading, error } = useQuery<AnalyticsResponse>({
@@ -244,4 +244,6 @@ export function PredictionConfidenceChart({ className }: PredictionConfidenceCha
       </CardContent>
     </Card>
   );
-}
+});
+
+PredictionConfidenceChart.displayName = 'PredictionConfidenceChart';

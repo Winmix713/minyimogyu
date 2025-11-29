@@ -1,35 +1,11 @@
-import { createContext, useEffect, useState, useCallback, ReactNode } from 'react';
+import { useEffect, useState, useCallback, ReactNode } from 'react';
 import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { AuthContext, UserProfile, UserRole, AuthContextType } from './AuthContext';
 
-export type UserRole = 'admin' | 'analyst' | 'user';
-
-export interface UserProfile {
-  id: string;
-  email: string;
-  full_name: string | null;
-  role: UserRole;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  profile: UserProfile | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName?: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  refreshProfile: () => Promise<void>;
-  hasRole: (role: UserRole) => boolean;
-  hasAnyRole: (roles: UserRole[]) => boolean;
-  isAdmin: () => boolean;
-  isAnalyst: () => boolean;
-}
-
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export { AuthContext };
+export type { UserRole, UserProfile, AuthContextType };
 
 interface AuthProviderProps {
   children: ReactNode;
