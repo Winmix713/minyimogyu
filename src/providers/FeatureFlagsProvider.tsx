@@ -1,28 +1,6 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { phaseFlags } from '@/config/env';
-
-interface FeatureFlag {
-  phase5: boolean;    // Advanced pattern detection
-  phase6: boolean;    // Model evaluation & feedback loop  
-  phase7: boolean;    // Cross-league intelligence
-  phase8: boolean;    // Monitoring & visualization
-  phase9: boolean;    // Collaborative market intelligence
-}
-
-interface FeatureFlagsContextType {
-  flags: FeatureFlag;
-  isEnabled: (flag: keyof FeatureFlag) => boolean;
-}
-
-const FeatureFlagsContext = createContext<FeatureFlagsContextType | undefined>(undefined);
-
-const defaultFlags: FeatureFlag = {
-  phase5: false,
-  phase6: false,
-  phase7: false,
-  phase8: false,
-  phase9: false,
-};
+import { FeatureFlagsContext, FeatureFlag, defaultFlags } from './FeatureFlagsContext';
 
 const loadFlagsFromEnv = (): FeatureFlag => {
   return {
@@ -51,13 +29,3 @@ export const FeatureFlagsProvider: React.FC<FeatureFlagsProviderProps> = ({ chil
     </FeatureFlagsContext.Provider>
   );
 };
-
-export const useFeatureFlags = (): FeatureFlagsContextType => {
-  const context = useContext(FeatureFlagsContext);
-  if (context === undefined) {
-    throw new Error('useFeatureFlags must be used within a FeatureFlagsProvider');
-  }
-  return context;
-};
-
-export type { FeatureFlag };

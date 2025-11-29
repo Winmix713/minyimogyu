@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 import type { MetricsPoint } from "./PerformanceMetricsChart.types";
@@ -7,7 +8,7 @@ interface Props {
   data: MetricsPoint[];
 }
 
-export function PerformanceMetricsChart({ title = "Latency over time", data }: Props) {
+export const PerformanceMetricsChart = memo(function PerformanceMetricsChart({ title = "Latency over time", data }: Props) {
   return (
     <Card className="border-border/60 bg-muted/20">
       <CardHeader>
@@ -33,6 +34,8 @@ export function PerformanceMetricsChart({ title = "Latency over time", data }: P
       </CardContent>
     </Card>
   );
-}
+});
+
+PerformanceMetricsChart.displayName = 'PerformanceMetricsChart';
 
 export default PerformanceMetricsChart;

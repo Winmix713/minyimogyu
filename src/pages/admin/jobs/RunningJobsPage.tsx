@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Play, RefreshCw, Square, Timer } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -52,7 +52,7 @@ const RunningJobsPage = () => {
 
   const runningCount = useMemo(() => jobs.filter((job) => job.last_log?.status === "running").length, [jobs]);
 
-  const handleStart = async (job: JobSummary) => {
+  const handleStart = useCallback(async (job: JobSummary) => {
     setStartingJobName(job.job_name);
     try {
       await startJob(job.job_name);
@@ -61,9 +61,9 @@ const RunningJobsPage = () => {
     } finally {
       setStartingJobName(null);
     }
-  };
+  }, [startJob]);
 
-  const handleStopConfirm = async () => {
+  const handleStopConfirm = useCallback(async () => {
     if (!jobToStop) return;
     setStoppingJobId(jobToStop.id);
     try {
@@ -74,7 +74,7 @@ const RunningJobsPage = () => {
       setStoppingJobId(null);
       setJobToStop(null);
     }
-  };
+  }, [jobToStop, stopJob]);
 
   const cards = useMemo(() => {
     if (isLoading) {

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useEffect, type ReactNode } from "react";
+import { useCallback, useEffect, type ReactNode } from "react";
 import { useLocalStorage } from "@/winmixpro/hooks/useLocalStorage";
 import { STORAGE_KEYS } from "@/winmixpro/lib/constants";
 import {
@@ -9,20 +9,9 @@ import {
   getThemeById,
   PRESET_THEMES,
 } from "@/winmixpro/lib/theme-manager";
-import type { ThemePreset } from "@/winmixpro/types";
+import { ThemeContext, ThemeContextValue } from "./ThemeContext";
 
-interface ThemeContextValue {
-  currentTheme: ThemePreset;
-  setTheme: (themeId: string) => void;
-  presets: ThemePreset[];
-  favorites: string[];
-  toggleFavorite: (themeId: string) => void;
-  exportCSS: () => string;
-  exportJSON: () => string;
-  resetTheme: () => void;
-}
-
-export const ThemeContext = createContext<ThemeContextValue | null>(null);
+export { ThemeContext };
 
 interface ThemeProviderProps {
   children: ReactNode;
