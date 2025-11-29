@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { useQueries } from "@tanstack/react-query";
+import { useMemo, useCallback } from "react";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import {
   Activity,
   Cpu,
@@ -12,49 +12,19 @@ import {
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import CategoryCard from "@/components/admin/CategoryCard";
-import { supabase } from "@/integrations/supabase/client";
 import { useJobs } from "@/hooks/admin/useJobs";
 import { usePhase9Settings } from "@/hooks/admin/usePhase9Settings";
 import { useAuth } from "@/hooks/useAuth";
+import { getSystemMetrics } from "@/lib/admin-utils";
 import type { AdminCategoryCard } from "@/types/admin";
 
-const fetchCount = async (table: string): Promise<number | null> => {
-  const { count, error } = await supabase.from(table).select("id", { count: "exact", head: true });
-
-  if (error) {
-    if (error.code === "42P01") {
-      return null;
-    }
-    throw error;
-  }
-
-  return count ?? 0;
-};
-
 const AdminDashboard = () => {
-  const counts = useQueries({
-    queries: [
-      {
-        queryKey: ["admin", "counts", "users"],
-        queryFn: () => fetchCount("user_profiles"),
-        staleTime: 60_000,
-      },
-      {
-        queryKey: ["admin", "counts", "models"],
-        queryFn: () => fetchCount("models"),
-        staleTime: 60_000,
-      },
-      {
-        queryKey: ["admin", "counts", "matches"],
-        queryFn: () => fetchCount("matches"),
-        staleTime: 60_000,
-      },
-    ],
+  const { data: metrics, isLoading: metricsLoading } = useQuery({
+    queryKey: ["admin", "system-metrics"],
+    queryFn: getSystemMetrics,
+    staleTime: 60_000,
+    refetchInterval: 120_000,
   });
-
-  const usersCount = counts[0]?.data ?? null;
-  const modelsCount = counts[1]?.data ?? null;
-  const matchesCount = counts[2]?.data ?? null;
 
   const { jobs, isLoading: jobsLoading } = useJobs({ refetchInterval: 60_000 });
   const { settings } = usePhase9Settings();
@@ -62,15 +32,14 @@ const AdminDashboard = () => {
   const role = profile?.role ?? "user";
 
   const runningJobs = useMemo(() => {
-    if (jobsLoading) {
+    if (jobsLoading || !jobs) {
       return null;
     }
-
     return jobs.filter((job) => job.last_log?.status === "running").length;
   }, [jobs, jobsLoading]);
 
-  const cards: AdminCategoryCard[] = useMemo(() => (
-    [
+  const cards: AdminCategoryCard[] = useMemo(() => {
+    const baseCards: AdminCategoryCard[] = [
       {
         id: "dashboard-overview",
         title: "System Overview",
@@ -88,7 +57,7 @@ const AdminDashboard = () => {
         href: "/admin/users",
         icon: Users,
         accentColorClass: "from-emerald-500/10 to-emerald-500/5",
-        value: usersCount,
+        value: metrics?.totalUsers ?? null,
         allowedRoles: ["admin"],
       },
       {
@@ -107,7 +76,7 @@ const AdminDashboard = () => {
         href: "/models",
         icon: Activity,
         accentColorClass: "from-purple-500/10 to-purple-500/5",
-        value: modelsCount,
+        value: metrics?.totalModels ?? null,
       },
       {
         id: "model-status",
@@ -137,7 +106,7 @@ const AdminDashboard = () => {
         href: "/admin/database",
         icon: Database,
         accentColorClass: "from-indigo-500/10 to-indigo-500/5",
-        value: matchesCount,
+        value: metrics?.totalMatches ?? null,
         allowedRoles: ["admin"],
       },
       {
@@ -149,8 +118,10 @@ const AdminDashboard = () => {
         accentColorClass: "from-slate-500/10 to-slate-500/5",
         value: "Coming soon",
       },
-    ].filter((card) => !card.allowedRoles || card.allowedRoles.includes(role))
-  ), [usersCount, runningJobs, modelsCount, matchesCount, settings, role]);
+    ];
+
+    return baseCards.filter((card) => !card.allowedRoles || card.allowedRoles.includes(role));
+  }, [metrics, runningJobs, settings, role]);
 
   return (
     <AdminLayout

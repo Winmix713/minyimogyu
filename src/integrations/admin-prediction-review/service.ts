@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import logger from "@/lib/logger";
 
 export interface BlockedPrediction {
   id: string;
@@ -68,7 +69,7 @@ export async function getBlockedPredictions(
 
     return data as PredictionReviewResponse;
   } catch (error) {
-    console.error("Error fetching blocked predictions:", error);
+    logger.error("Error fetching blocked predictions", error, { limit, offset }, "PredictionReview");
     throw error;
   }
 }
@@ -91,7 +92,7 @@ export async function submitPredictionReview(
 
     return data as ReviewActionResponse;
   } catch (error) {
-    console.error("Error submitting prediction review:", error);
+    logger.error("Error submitting prediction review", error, { request }, "PredictionReview");
     throw error;
   }
 }

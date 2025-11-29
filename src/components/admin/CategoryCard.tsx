@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,7 @@ interface CategoryCardProps {
   card: AdminCategoryCard;
 }
 
-const formatValue = (value: AdminCategoryCard["value"]) => {
+const formatValue = (value: AdminCategoryCard["value"]): string => {
   if (value === null || value === undefined) {
     return "–";
   }
@@ -16,10 +17,10 @@ const formatValue = (value: AdminCategoryCard["value"]) => {
     return new Intl.NumberFormat().format(value);
   }
 
-  return value;
+  return String(value);
 };
 
-export default function CategoryCard({ card }: CategoryCardProps) {
+const CategoryCard = memo(({ card }: CategoryCardProps) => {
   return (
     <Card className="relative overflow-hidden border-border/60 bg-gradient-to-br shadow-sm transition hover:shadow-md">
       <div className={`pointer-events-none absolute inset-0 opacity-80 ${card.accentColorClass}`} />
@@ -32,11 +33,11 @@ export default function CategoryCard({ card }: CategoryCardProps) {
             </CardTitle>
             <CardDescription>{card.description}</CardDescription>
           </div>
-          {card.pill ? (
+          {card.pill && (
             <span className="rounded-full bg-background/70 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-foreground">
               {card.pill}
             </span>
-          ) : null}
+          )}
         </div>
       </CardHeader>
       <CardContent className="relative z-10 flex items-end justify-between">
@@ -49,4 +50,8 @@ export default function CategoryCard({ card }: CategoryCardProps) {
       </CardFooter>
     </Card>
   );
-}
+});
+
+CategoryCard.displayName = "CategoryCard";
+
+export default CategoryCard;
