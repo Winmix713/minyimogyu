@@ -1,1071 +1,1071 @@
-// Phase 9: Advanced Features API Services
+// Phase 9 API Service - Market Correlation Analysis
+// Provides advanced correlation analysis between market signals, odds movements, and prediction accuracy
 
 import { supabase } from '@/integrations/supabase/client';
-import type {
-  UserPrediction,
-  CrowdWisdom,
-  MarketOdds,
-  ValueBet,
-  InformationFreshness,
-  FeatureExperiment,
-  UserPredictionForm,
-  UserPredictionResponse,
-  CrowdWisdomResponse,
-  MarketOddsResponse,
-  ValueBetsResponse,
-  FreshnessScoreResponse,
-  StaleDataCheckResponse,
-  FeatureGenerationRequest,
-  FeatureGenerationResponse,
-  ContinuousLearningResponse,
-  ExpectedValueCalculation,
-  DivergenceAnalysis
-} from '@/types/phase9';
+import { logger } from '@/lib/logger';
 
- 
-// 9.1 Collaborative Intelligence API Services
-
-export class CollaborativeIntelligenceService {
-  /**
-   * Submit a user prediction for a match
-   */
-  static async submitUserPrediction(
-    prediction: UserPredictionForm,
-    userId: string = 'anonymous' // In production, get from auth
-  ): Promise<UserPredictionResponse> {
-    try {
-      const { data, error } = await supabase
-        .from('user_predictions')
-        .insert({
-          ...prediction,
-          user_id: userId
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Update crowd wisdom aggregation after new prediction
-      await this.updateCrowdWisdom(prediction.match_id);
-
-      return {
-        success: true,
-        prediction: data as UserPrediction
-      };
-    } catch (error) {
-      console.error('Error submitting user prediction:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to submit prediction'
-      };
-    }
-  }
-
-  /**
-   * Get crowd wisdom for a specific match
-   */
-  static async getCrowdWisdom(matchId: string): Promise<CrowdWisdomResponse> {
-    try {
-      const { data, error } = await supabase
-        .from('crowd_wisdom')
-        .select('*')
-        .eq('match_id', matchId)
-        .single();
-
-      if (error && error.code !== 'PGRST116') { // PGRST116 = not found
-        throw error;
-      }
-
-      return {
-        success: true,
-        crowdWisdom: data as CrowdWisdom || null
-      };
-    } catch (error) {
-      console.error('Error fetching crowd wisdom:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch crowd wisdom'
-      };
-    }
-  }
-
-  /**
-   * Get user predictions for a match
-   */
-  static async getUserPredictions(matchId: string): Promise<{ success: boolean; predictions?: UserPrediction[]; error?: string }> {
-    try {
-      const { data, error } = await supabase
-        .from('user_predictions')
-        .select('*')
-        .eq('match_id', matchId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      return {
-        success: true,
-        predictions: data as UserPrediction[]
-      };
-    } catch (error) {
-      console.error('Error fetching user predictions:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch user predictions'
-      };
-    }
-  }
-
-  /**
-   * Update crowd wisdom aggregation (internal method)
-   */
-  private static async updateCrowdWisdom(matchId: string): Promise<void> {
-    try {
-      const { error } = await supabase.rpc('update_crowd_wisdom', {
-        p_match_id: matchId
-      });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error updating crowd wisdom:', error);
-      // Don't throw here, as this is a background operation
-    }
-  }
-
-  /**
-   * Analyze divergence between model and crowd predictions
-   */
-  static async analyzeDivergence(matchId: string): Promise<{ success: boolean; analysis?: DivergenceAnalysis; error?: string }> {
-    try {
-      // Get model prediction
-      const { data: modelData, error: modelError } = await supabase
-        .from('predictions')
-        .select('predicted_outcome, confidence_score')
-        .eq('match_id', matchId)
-        .single();
-
-      if (modelError && modelError.code !== 'PGRST116') throw modelError;
-
-      // Get crowd wisdom
-      const crowdResult = await this.getCrowdWisdom(matchId);
-      if (!crowdResult.success || !crowdResult.crowdWisdom) {
-        throw new Error('No crowd wisdom data available');
-      }
-
-      const crowdWisdom = crowdResult.crowdWisdom;
-      
-      if (!modelData || !crowdWisdom.consensus_prediction) {
-        throw new Error('Insufficient data for divergence analysis');
-      }
-
-      const divergence = crowdWisdom.model_vs_crowd_divergence;
-      
-      let interpretation: 'high' | 'medium' | 'low';
-      if (divergence > 30) interpretation = 'high';
-      else if (divergence > 15) interpretation = 'medium';
-      else interpretation = 'low';
-
-      let recommendation: string;
-      if (interpretation === 'high') {
-        recommendation = 'Significant disagreement between model and crowd. Consider investigating further.';
-      } else if (interpretation === 'medium') {
-        recommendation = 'Moderate disagreement. Worth monitoring for potential insights.';
-      } else {
-        recommendation = 'Good agreement between model and crowd. High confidence in predictions.';
-      }
-
-      const analysis: DivergenceAnalysis = {
-        modelPrediction: modelData.predicted_outcome,
-        modelConfidence: modelData.confidence_score,
-        crowdConsensus: crowdWisdom.consensus_prediction,
-        crowdConfidence: crowdWisdom.consensus_confidence,
-        divergence,
-        interpretation,
-        recommendation
-      };
-
-      return {
-        success: true,
-        analysis
-      };
-    } catch (error) {
-      console.error('Error analyzing divergence:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to analyze divergence'
-      };
-    }
-  }
+// Types for market correlation analysis
+export interface MarketSignal {
+  id: string;
+  signal_type: 'odds_movement' | 'volume_change' | 'social_sentiment' | 'prediction_accuracy' | 'weather_impact' | 'team_news';
+  timestamp: string;
+  value: number;
+  metadata: Record<string, unknown>;
+  match_id?: string;
+  league_id?: string;
+  bookmaker?: string;
+  source: string;
 }
 
-// 9.2 Market Integration API Services
+export interface SignalCorrelationResult {
+  signal1: string;
+  signal2: string;
+  correlation_coefficient: number;
+  p_value: number;
+  sample_size: number;
+  confidence_interval: [number, number];
+  method: 'pearson' | 'spearman' | 'kendall';
+  lag_period?: number;
+  significance_level: number;
+  is_significant: boolean;
+}
 
-export class MarketIntegrationService {
-  private static readonly API_KEY = import.meta.env.VITE_ODDS_API_KEY || '';
+export interface SignalCorrelationMatrix {
+  signals: string[];
+  correlations: SignalCorrelationResult[];
+  metadata: {
+    total_signals: number;
+    analysis_period: {
+      start: string;
+      end: string;
+    };
+    method: string;
+    confidence_level: number;
+  };
+}
 
-  /**
-   * Fetch odds from external API for a specific match
-   */
-  static async fetchExternalOdds(matchId: string): Promise<MarketOddsResponse> {
+export interface TimeSeriesCorrelation {
+  signal1: string;
+  signal2: string;
+  overall_correlation: number;
+  optimal_lag: number;
+  trend_direction: 'increasing' | 'decreasing' | 'stable';
+  data_points: Array<{
+    date: string;
+    signal1_value: number;
+    signal2_value: number;
+    correlation: number;
+  }>;
+  significance_tests: {
+    augmented_dickey_fuller: number;
+    phillips_perron: number;
+    kpss: number;
+  };
+}
+
+export interface CrossLeagueCorrelation {
+  source_league: string;
+  target_league: string;
+  signal_type: string;
+  correlation_coefficient: number;
+  significance_score: number;
+  sample_size: number;
+  time_lag: number;
+  confidence_level: number;
+}
+
+export interface MarketCorrelationAnalysisOptions {
+  method?: 'pearson' | 'spearman' | 'kendall';
+  confidenceLevel?: number;
+  minPeriods?: number;
+  includeLagCorrelations?: boolean;
+  lagPeriods?: number[];
+  seasonalAdjustment?: boolean;
+  outlierRemoval?: boolean;
+  normalizeData?: boolean;
+}
+
+export interface MarketSignalsFetchOptions {
+  leagueId?: string;
+  timeRange?: '7d' | '30d' | '90d' | '1y';
+  signalTypes?: string[];
+  minConfidence?: number;
+  includeInactive?: boolean;
+}
+
+export interface ValueBetOpportunity {
+  id: string;
+  match_id: string;
+  bookmaker: string;
+  bet_type: string;
+  odds: number;
+  model_probability: number;
+  implied_probability: number;
+  expected_value: number;
+  confidence_level: 'high' | 'medium' | 'low';
+  kelly_fraction: number;
+  detection_timestamp: string;
+  market_signals: string[];
+  correlation_strength: number;
+}
+
+export interface MarketArbitrageOpportunity {
+  id: string;
+  match_id: string;
+  outcome: string;
+  bookmaker_1: string;
+  odds_1: number;
+  bookmaker_2: string;
+  odds_2: number;
+  arbitrage_percentage: number;
+  total_investment: number;
+  profit_potential: number;
+  confidence_score: number;
+  detection_timestamp: string;
+  market_inefficiency_score: number;
+}
+
+class MarketCorrelationService {
+  private readonly tableName = 'market_signals';
+  private readonly correlationCache = new Map<string, unknown>();
+  private readonly cacheTimeout = 5 * 60 * 1000; // 5 minutes
+
+  // Fetch market signals from database and external sources
+  async fetchMarketSignals(options: MarketSignalsFetchOptions = {}): Promise<{
+    success: boolean;
+    signals?: MarketSignal[];
+    error?: string;
+  }> {
     try {
-      // In a real implementation, you would map matchId to the format expected by the odds API
-      // For now, we'll simulate the API call with mock data
-      
-      if (!this.API_KEY) {
-        throw new Error('Odds API key not configured');
+      const {
+        leagueId = 'all',
+        timeRange = '30d',
+        signalTypes = ['odds_movement', 'volume_change', 'social_sentiment', 'prediction_accuracy'],
+        minConfidence = 0.7,
+        includeInactive = false
+      } = options;
+
+      // Calculate date range
+      const endDate = new Date();
+      const startDate = new Date();
+      switch (timeRange) {
+        case '7d':
+          startDate.setDate(startDate.getDate() - 7);
+          break;
+        case '30d':
+          startDate.setDate(startDate.getDate() - 30);
+          break;
+        case '90d':
+          startDate.setDate(startDate.getDate() - 90);
+          break;
+        case '1y':
+          startDate.setFullYear(startDate.getFullYear() - 1);
+          break;
       }
 
-      // Simulate API call with retry logic and exponential backoff
-      const oddsData = await this.fetchOddsWithRetry(matchId);
-
-      if (!oddsData.success) {
-        throw new Error(oddsData.error);
-      }
-
-      // Store odds in database
-      const storedOdds = await this.storeMarketOdds(matchId, oddsData.data!);
-
-      return {
-        success: true,
-        odds: storedOdds
-      };
-    } catch (error) {
-      console.error('Error fetching external odds:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch external odds'
-      };
-    }
-  }
-
-  /**
-   * Get stored market odds for a match
-   */
-  static async getMarketOdds(matchId: string): Promise<MarketOddsResponse> {
-    try {
-      const { data, error } = await supabase
-        .from('market_odds')
+      // Build query
+      let query = supabase
+        .from(this.tableName)
         .select('*')
-        .eq('match_id', matchId)
-        .order('last_updated', { ascending: false });
+        .in('signal_type', signalTypes)
+        .gte('timestamp', startDate.toISOString())
+        .lte('timestamp', endDate.toISOString())
+        .order('timestamp', { ascending: true });
 
-      if (error) throw error;
+      // Apply filters
+      if (leagueId !== 'all') {
+        query = query.eq('league_id', leagueId);
+      }
 
-      return {
-        success: true,
-        odds: data as MarketOdds[]
-      };
+      if (!includeInactive) {
+        query = query.eq('is_active', true);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
+
+      // Transform data to MarketSignal format
+      const signals: MarketSignal[] = (data || []).map(row => ({
+        id: row.id,
+        signal_type: row.signal_type,
+        timestamp: row.timestamp,
+        value: row.value,
+        metadata: row.metadata || {},
+        match_id: row.match_id,
+        league_id: row.league_id,
+        bookmaker: row.bookmaker,
+        source: row.source || 'database'
+      }));
+
+      // Fetch external signals if needed
+      const externalSignals = await this.fetchExternalSignals(options);
+      signals.push(...externalSignals);
+
+      logger.info('Fetched market signals', { 
+        count: signals.length, 
+        leagueId, 
+        timeRange,
+        signalTypes 
+      }, 'MarketCorrelationService');
+
+      return { success: true, signals };
+
     } catch (error) {
-      console.error('Error fetching market odds:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch market odds'
-      };
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Failed to fetch market signals', error, { options }, 'MarketCorrelationService');
+      return { success: false, error: errorMessage };
     }
   }
 
-  /**
-   * Calculate and store value bets
-   */
-  static async calculateValueBets(matchId?: string): Promise<ValueBetsResponse> {
+  // Calculate correlation matrix between all signal pairs
+  async calculateCorrelationMatrix(
+    signals: MarketSignal[],
+    options: MarketCorrelationAnalysisOptions = {}
+  ): Promise<{
+    success: boolean;
+    matrix?: SignalCorrelationMatrix;
+    error?: string;
+  }> {
     try {
-      // Get model predictions
-      let modelQuery = supabase.from('predictions').select('*');
-      if (matchId) {
-        modelQuery = modelQuery.eq('match_id', matchId);
+      const {
+        method = 'pearson',
+        confidenceLevel = 0.95,
+        minPeriods = 10,
+        includeLagCorrelations = true,
+        lagPeriods = [1, 3, 7, 14],
+        seasonalAdjustment = false,
+        outlierRemoval = true,
+        normalizeData = true
+      } = options;
+
+      // Group signals by type
+      const signalGroups = this.groupSignalsByType(signals);
+      const signalTypes = Object.keys(signalGroups);
+
+      if (signalTypes.length < 2) {
+        throw new Error('At least two different signal types required for correlation analysis');
       }
 
-      const { data: modelPredictions, error: modelError } = await modelQuery;
-      if (modelError) throw modelError;
+      // Calculate correlations for all pairs
+      const correlations: SignalCorrelationResult[] = [];
 
-      if (!modelPredictions || modelPredictions.length === 0) {
-        return {
-          success: true,
-          valueBets: []
-        };
-      }
+      for (let i = 0; i < signalTypes.length; i++) {
+        for (let j = i + 1; j < signalTypes.length; j++) {
+          const signal1Type = signalTypes[i];
+          const signal2Type = signalTypes[j];
 
-      const valueBets: ValueBet[] = [];
+          // Align signals by timestamp
+          const alignedSignals = this.alignSignalsByTime(
+            signalGroups[signal1Type],
+            signalGroups[signal2Type]
+          );
 
-      // Process each prediction
-      for (const prediction of modelPredictions) {
-        // Get market odds for this match
-        const oddsResult = await this.getMarketOdds(prediction.match_id);
-        if (!oddsResult.success || !oddsResult.odds || oddsResult.odds.length === 0) {
-          continue;
-        }
+          if (alignedSignals.length < minPeriods) {
+            logger.warn('Insufficient data for correlation calculation', {
+              signal1: signal1Type,
+              signal2: signal2Type,
+              sampleSize: alignedSignals.length,
+              minRequired: minPeriods
+            }, 'MarketCorrelationService');
+            continue;
+          }
 
-        // Calculate value bets for each bookmaker
-        for (const odds of oddsResult.odds) {
-          const modelProb = prediction.confidence_score / 100;
-          
-          // Calculate expected value for each outcome
-          const outcomes = [
-            { type: 'home_win', odds: odds.home_win_odds, modelProb: this.getOutcomeProbability(prediction, 'home_win') },
-            { type: 'draw', odds: odds.draw_odds, modelProb: this.getOutcomeProbability(prediction, 'draw') },
-            { type: 'away_win', odds: odds.away_win_odds, modelProb: this.getOutcomeProbability(prediction, 'away_win') }
-          ];
+          // Apply preprocessing
+          let processedSignals = alignedSignals;
+          if (outlierRemoval) {
+            processedSignals = this.removeOutliers(processedSignals);
+          }
+          if (normalizeData) {
+            processedSignals = this.normalizeSignalData(processedSignals);
+          }
 
-          for (const outcome of outcomes) {
-            const ev = this.calculateExpectedValue(outcome.odds, outcome.modelProb);
-            const kelly = this.calculateKellyFraction(outcome.odds, outcome.modelProb);
+          // Calculate correlation
+          const correlation = this.calculateCorrelation(
+            processedSignals.map(s => s.value1),
+            processedSignals.map(s => s.value2),
+            method
+          );
 
-            if (ev > 0) { // Only consider positive EV bets
-              const confidenceLevel = this.getConfidenceLevel(ev, kelly);
+          // Calculate p-value and confidence interval
+          const { pValue, confidenceInterval } = this.calculateSignificance(
+            correlation,
+            processedSignals.length,
+            confidenceLevel
+          );
 
-              const valueBet: ValueBet = {
-                id: '', // Will be set by database
-                match_id: prediction.match_id,
-                bookmaker: odds.bookmaker,
-                bet_type: outcome.type as ValueBet['bet_type'],
-                bookmaker_odds: outcome.odds,
-                model_probability: outcome.modelProb,
-                implied_probability: 1 / outcome.odds,
-                expected_value: ev,
-                kelly_fraction: kelly,
-                confidence_level: confidenceLevel,
-                is_active: true,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              };
+          const result: SignalCorrelationResult = {
+            signal1: signal1Type,
+            signal2: signal2Type,
+            correlation_coefficient: correlation,
+            p_value: pValue,
+            sample_size: processedSignals.length,
+            confidence_interval: confidenceInterval,
+            method,
+            significance_level: confidenceLevel,
+            is_significant: pValue < (1 - confidenceLevel)
+          };
 
-              valueBets.push(valueBet);
+          correlations.push(result);
+
+          // Calculate lag correlations if enabled
+          if (includeLagCorrelations) {
+            for (const lagPeriod of lagPeriods) {
+              const laggedSignals = this.applyLag(processedSignals, lagPeriod);
+              if (laggedSignals.length >= minPeriods) {
+                const laggedCorrelation = this.calculateCorrelation(
+                  laggedSignals.map(s => s.value1),
+                  laggedSignals.map(s => s.value2),
+                  method
+                );
+
+                const { pValue: laggedPValue } = this.calculateSignificance(
+                  laggedCorrelation,
+                  laggedSignals.length,
+                  confidenceLevel
+                );
+
+                correlations.push({
+                  ...result,
+                  correlation_coefficient: laggedCorrelation,
+                  p_value: laggedPValue,
+                  lag_period: lagPeriod,
+                  is_significant: laggedPValue < (1 - confidenceLevel)
+                });
+              }
             }
           }
         }
       }
 
-      // Store value bets in database
-      if (valueBets.length > 0) {
-        const { data: storedBets, error: storeError } = await supabase
-          .from('value_bets')
-          .upsert(valueBets, { onConflict: 'match_id,bookmaker,bet_type' })
-          .select();
-
-        if (storeError) throw storeError;
-
-        return {
-          success: true,
-          valueBets: storedBets as ValueBet[]
-        };
-      }
-
-      return {
-        success: true,
-        valueBets: []
+      // Create correlation matrix
+      const matrix: SignalCorrelationMatrix = {
+        signals: signalTypes,
+        correlations,
+        metadata: {
+          total_signals: signals.length,
+          analysis_period: {
+            start: signals.length > 0 ? signals[0].timestamp : new Date().toISOString(),
+            end: signals.length > 0 ? signals[signals.length - 1].timestamp : new Date().toISOString()
+          },
+          method,
+          confidence_level: confidenceLevel
+        }
       };
+
+      logger.info('Correlation matrix calculated', {
+        signalTypes: signalTypes.length,
+        correlations: correlations.length,
+        method,
+        confidenceLevel
+      }, 'MarketCorrelationService');
+
+      return { success: true, matrix };
+
     } catch (error) {
-      console.error('Error calculating value bets:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to calculate value bets'
-      };
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Failed to calculate correlation matrix', error, { options }, 'MarketCorrelationService');
+      return { success: false, error: errorMessage };
     }
   }
 
-  /**
-   * Get active value bets
-   */
-  static async getValueBets(maxResults: number = 50): Promise<ValueBetsResponse> {
+  // Analyze time series correlations
+  async analyzeTimeSeriesCorrelation(
+    signals: MarketSignal[],
+    options: {
+      windowSize?: number;
+      stepSize?: number;
+      seasonalAdjustment?: boolean;
+    } = {}
+  ): Promise<{
+    success: boolean;
+    timeSeriesData?: TimeSeriesCorrelation[];
+    error?: string;
+  }> {
     try {
-      const { data, error } = await supabase
-        .from('value_bets')
-        .select('*')
-        .eq('is_active', true)
-        .order('expected_value', { ascending: false })
-        .limit(maxResults);
+      const {
+        windowSize = 30,
+        stepSize = 7,
+        seasonalAdjustment = false
+      } = options;
 
-      if (error) throw error;
+      const signalGroups = this.groupSignalsByType(signals);
+      const signalTypes = Object.keys(signalGroups);
 
-      return {
-        success: true,
-        valueBets: data as ValueBet[]
-      };
+      const timeSeriesData: TimeSeriesCorrelation[] = [];
+
+      for (let i = 0; i < signalTypes.length; i++) {
+        for (let j = i + 1; j < signalTypes.length; j++) {
+          const signal1Type = signalTypes[i];
+          const signal2Type = signalTypes[j];
+
+          const alignedSignals = this.alignSignalsByTime(
+            signalGroups[signal1Type],
+            signalGroups[signal2Type]
+          );
+
+          if (alignedSignals.length < windowSize * 2) {
+            continue;
+          }
+
+          // Calculate rolling correlations
+          const dataPoints: TimeSeriesCorrelation['data_points'] = [];
+          let totalCorrelation = 0;
+          let validWindows = 0;
+
+          for (let start = 0; start <= alignedSignals.length - windowSize; start += stepSize) {
+            const window = alignedSignals.slice(start, start + windowSize);
+            const correlation = this.calculateCorrelation(
+              window.map(s => s.value1),
+              window.map(s => s.value2)
+            );
+
+            const windowDate = window[Math.floor(windowSize / 2)].timestamp;
+            
+            dataPoints.push({
+              date: windowDate,
+              signal1_value: window[Math.floor(windowSize / 2)].value1,
+              signal2_value: window[Math.floor(windowSize / 2)].value2,
+              correlation
+            });
+
+            if (!isNaN(correlation)) {
+              totalCorrelation += Math.abs(correlation);
+              validWindows++;
+            }
+          }
+
+          // Calculate trend direction
+          const correlations = dataPoints.map(d => d.correlation).filter(c => !isNaN(c));
+          const trendDirection = this.calculateTrendDirection(correlations);
+
+          // Find optimal lag
+          const optimalLag = this.findOptimalLag(alignedSignals);
+
+          // Perform significance tests
+          const significanceTests = this.performStationarityTests(correlations);
+
+          const timeSeriesCorrelation: TimeSeriesCorrelation = {
+            signal1: signal1Type,
+            signal2: signal2Type,
+            overall_correlation: validWindows > 0 ? totalCorrelation / validWindows : 0,
+            optimal_lag: optimalLag,
+            trend_direction: trendDirection,
+            data_points: dataPoints,
+            significance_tests: significanceTests
+          };
+
+          timeSeriesData.push(timeSeriesCorrelation);
+        }
+      }
+
+      logger.info('Time series correlation analysis completed', {
+        signalPairs: timeSeriesData.length,
+        windowSize,
+        stepSize
+      }, 'MarketCorrelationService');
+
+      return { success: true, timeSeriesData };
+
     } catch (error) {
-      console.error('Error fetching value bets:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch value bets'
-      };
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Failed to analyze time series correlations', error, { options }, 'MarketCorrelationService');
+      return { success: false, error: errorMessage };
     }
   }
 
-  /**
-   * Fetch odds with retry logic and exponential backoff
-   */
-  private static async fetchOddsWithRetry(matchId: string, maxRetries: number = 3): Promise<{ success: boolean; data?: unknown; error?: string }> {
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        // Simulate API call - in real implementation, call actual odds API
-        const mockOddsData = this.generateMockOddsData(matchId);
-        
-        return {
-          success: true,
-          data: mockOddsData
-        };
-      } catch (error) {
-        if (attempt === maxRetries - 1) {
-          return {
-            success: false,
-            error: `Failed after ${maxRetries} attempts: ${error instanceof Error ? error.message : 'Unknown error'}`
-          };
-        }
+  // Analyze cross-league correlations
+  async analyzeCrossLeagueCorrelation(
+    sourceLeagueId: string,
+    signals: MarketSignal[]
+  ): Promise<{
+    success: boolean;
+    crossLeagueData?: CrossLeagueCorrelation[];
+    error?: string;
+  }> {
+    try {
+      // Get signals from other leagues
+      const { success: otherLeaguesSuccess, signals: otherLeagueSignals } = 
+        await this.fetchMarketSignals({
+          timeRange: '90d',
+          signalTypes: ['odds_movement', 'volume_change']
+        });
 
-        // Exponential backoff
-        const delay = Math.pow(2, attempt) * 1000;
-        await new Promise(resolve => setTimeout(resolve, delay));
+      if (!otherLeaguesSuccess || !otherLeagueSignals) {
+        throw new Error('Failed to fetch signals from other leagues');
+      }
+
+      // Group by league
+      const leagueGroups = this.groupSignalsByLeague(otherLeagueSignals);
+      const sourceLeagueSignals = leagueGroups[sourceLeagueId] || [];
+      
+      const crossLeagueData: CrossLeagueCorrelation[] = [];
+
+      for (const [targetLeagueId, targetSignals] of Object.entries(leagueGroups)) {
+        if (targetLeagueId === sourceLeagueId) continue;
+
+        // Group by signal type
+        const sourceSignalGroups = this.groupSignalsByType(sourceLeagueSignals);
+        const targetSignalGroups = this.groupSignalsByType(targetSignals);
+
+        for (const signalType of Object.keys(sourceSignalGroups)) {
+          if (!targetSignalGroups[signalType]) continue;
+
+          const alignedSignals = this.alignSignalsByTime(
+            sourceSignalGroups[signalType],
+            targetSignalGroups[signalType]
+          );
+
+          if (alignedSignals.length < 20) continue;
+
+          const correlation = this.calculateCorrelation(
+            alignedSignals.map(s => s.value1),
+            alignedSignals.map(s => s.value2)
+          );
+
+          const { pValue } = this.calculateSignificance(correlation, alignedSignals.length);
+
+          // Calculate time lag
+          const optimalLag = this.findOptimalLag(alignedSignals);
+
+          // Calculate market inefficiency score
+          const inefficiencyScore = Math.abs(correlation) * (1 - pValue);
+
+          const crossLeagueCorrelation: CrossLeagueCorrelation = {
+            source_league: sourceLeagueId,
+            target_league: targetLeagueId,
+            signal_type: signalType,
+            correlation_coefficient: correlation,
+            significance_score: 1 - pValue,
+            sample_size: alignedSignals.length,
+            time_lag: optimalLag,
+            confidence_level: 0.95
+          };
+
+          crossLeagueData.push(crossLeagueCorrelation);
+        }
+      }
+
+      logger.info('Cross-league correlation analysis completed', {
+        sourceLeague: sourceLeagueId,
+        correlations: crossLeagueData.length
+      }, 'MarketCorrelationService');
+
+      return { success: true, crossLeagueData };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Failed to analyze cross-league correlations', error, { sourceLeagueId }, 'MarketCorrelationService');
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  // Identify value bet opportunities based on correlation analysis
+  async identifyValueBetOpportunities(
+    correlations: SignalCorrelationResult[],
+    minExpectedValue: number = 0.05
+  ): Promise<{
+    success: boolean;
+    opportunities?: ValueBetOpportunity[];
+    error?: string;
+  }> {
+    try {
+      const opportunities: ValueBetOpportunity[] = [];
+
+      // Get current odds and predictions
+      const { data: matches } = await supabase
+        .from('matches')
+        .select(`
+          id,
+          home_team,
+          away_team,
+          league_id,
+          match_date,
+          predictions!inner(
+            model_id,
+            predicted_outcome,
+            confidence,
+            created_at
+          ),
+          market_odds!inner(
+            bookmaker,
+            home_win_odds,
+            draw_odds,
+            away_win_odds,
+            over_2_5_odds,
+            under_2_5_odds,
+            btts_yes_odds,
+            btts_no_odds,
+            updated_at
+          )
+        `)
+        .eq('status', 'upcoming')
+        .gte('match_date', new Date().toISOString())
+        .order('match_date', { ascending: true })
+        .limit(50);
+
+      if (!matches) {
+        return { success: true, opportunities: [] };
+      }
+
+      for (const match of matches) {
+        const { predictions, market_odds } = match;
+
+        for (const prediction of predictions) {
+          for (const odds of market_odds) {
+            // Calculate expected value for each outcome
+            const outcomes = [
+              { type: 'home_win', modelProb: this.getOutcomeProbability(prediction, 'home_win'), odds: odds.home_win_odds },
+              { type: 'draw', modelProb: this.getOutcomeProbability(prediction, 'draw'), odds: odds.draw_odds },
+              { type: 'away_win', modelProb: this.getOutcomeProbability(prediction, 'away_win'), odds: odds.away_win_odds },
+              { type: 'over_2_5', modelProb: this.getOutcomeProbability(prediction, 'over_2_5'), odds: odds.over_2_5_odds },
+              { type: 'under_2_5', modelProb: this.getOutcomeProbability(prediction, 'under_2_5'), odds: odds.under_2_5_odds },
+              { type: 'btts_yes', modelProb: this.getOutcomeProbability(prediction, 'btts_yes'), odds: odds.btts_yes_odds },
+              { type: 'btts_no', modelProb: this.getOutcomeProbability(prediction, 'btts_no'), odds: odds.btts_no_odds }
+            ];
+
+            for (const outcome of outcomes) {
+              if (!outcome.modelProb || !outcome.odds) continue;
+
+              const impliedProb = 1 / outcome.odds;
+              const expectedValue = (outcome.modelProb * outcome.odds) - 1;
+
+              if (expectedValue >= minExpectedValue) {
+                // Find related correlations
+                const relatedCorrelations = correlations.filter(c => 
+                  c.signal1.includes('odds') || c.signal2.includes('odds') ||
+                  c.signal1.includes('prediction') || c.signal2.includes('prediction')
+                );
+
+                const avgCorrelationStrength = relatedCorrelations.length > 0
+                  ? relatedCorrelations.reduce((sum, c) => sum + Math.abs(c.correlation_coefficient), 0) / relatedCorrelations.length
+                  : 0;
+
+                // Calculate Kelly fraction
+                const kellyFraction = this.calculateKellyFraction(expectedValue, outcome.modelProb);
+
+                // Determine confidence level
+                const confidenceLevel = this.getConfidenceLevel(
+                  prediction.confidence,
+                  avgCorrelationStrength,
+                  expectedValue
+                );
+
+                const opportunity: ValueBetOpportunity = {
+                  id: `${match.id}-${odds.bookmaker}-${outcome.type}`,
+                  match_id: match.id,
+                  bookmaker: odds.bookmaker,
+                  bet_type: outcome.type,
+                  odds: outcome.odds,
+                  model_probability: outcome.modelProb,
+                  implied_probability: impliedProb,
+                  expected_value: expectedValue,
+                  confidence_level: confidenceLevel,
+                  kelly_fraction: kellyFraction,
+                  detection_timestamp: new Date().toISOString(),
+                  market_signals: relatedCorrelations.map(c => `${c.signal1}↔${c.signal2}`),
+                  correlation_strength: avgCorrelationStrength
+                };
+
+                opportunities.push(opportunity);
+              }
+            }
+          }
+        }
+      }
+
+      // Sort by expected value
+      opportunities.sort((a, b) => b.expected_value - a.expected_value);
+
+      logger.info('Value bet opportunities identified', {
+        count: opportunities.length,
+        minExpectedValue
+      }, 'MarketCorrelationService');
+
+      return { success: true, opportunities };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Failed to identify value bet opportunities', error, { minExpectedValue }, 'MarketCorrelationService');
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  // Private helper methods
+  private groupSignalsByType(signals: MarketSignal[]): Record<string, MarketSignal[]> {
+    const groups: Record<string, MarketSignal[]> = {};
+    signals.forEach(signal => {
+      if (!groups[signal.signal_type]) {
+        groups[signal.signal_type] = [];
+      }
+      groups[signal.signal_type].push(signal);
+    });
+    return groups;
+  }
+
+  private groupSignalsByLeague(signals: MarketSignal[]): Record<string, MarketSignal[]> {
+    const groups: Record<string, MarketSignal[]> = {};
+    signals.forEach(signal => {
+      const leagueId = signal.league_id || 'unknown';
+      if (!groups[leagueId]) {
+        groups[leagueId] = [];
+      }
+      groups[leagueId].push(signal);
+    });
+    return groups;
+  }
+
+  private alignSignalsByTime(signals1: MarketSignal[], signals2: MarketSignal[]): Array<{
+    timestamp: string;
+    value1: number;
+    value2: number;
+  }> {
+    const aligned: Array<{ timestamp: string; value1: number; value2: number }> = [];
+    
+    const signals2Map = new Map(
+      signals2.map(s => [s.timestamp, s.value])
+    );
+
+    for (const signal1 of signals1) {
+      const value2 = signals2Map.get(signal1.timestamp);
+      if (value2 !== undefined) {
+        aligned.push({
+          timestamp: signal1.timestamp,
+          value1: signal1.value,
+          value2: value2
+        });
       }
     }
 
-    return {
-      success: false,
-      error: 'Max retries exceeded'
-    };
+    return aligned;
   }
 
-  /**
-   * Generate mock odds data (replace with real API call)
-   */
-  private static generateMockOddsData(matchId: string) {
-    return {
-      success: true,
-      data: [
-        {
-          bookmaker: 'Bet365',
-          home_win_odds: 2.10 + Math.random() * 0.4,
-          draw_odds: 3.20 + Math.random() * 0.4,
-          away_win_odds: 3.40 + Math.random() * 0.4,
-          over_2_5_odds: 1.80 + Math.random() * 0.2,
-          under_2_5_odds: 2.00 + Math.random() * 0.2,
-          btts_yes_odds: 1.70 + Math.random() * 0.2,
-          btts_no_odds: 2.10 + Math.random() * 0.2
-        },
-        {
-          bookmaker: 'William Hill',
-          home_win_odds: 2.05 + Math.random() * 0.4,
-          draw_odds: 3.30 + Math.random() * 0.4,
-          away_win_odds: 3.50 + Math.random() * 0.4,
-          over_2_5_odds: 1.85 + Math.random() * 0.2,
-          under_2_5_odds: 1.95 + Math.random() * 0.2,
-          btts_yes_odds: 1.75 + Math.random() * 0.2,
-          btts_no_odds: 2.05 + Math.random() * 0.2
+  private calculateCorrelation(x: number[], y: number, method: string = 'pearson'): number {
+    const n = x.length;
+    if (n === 0) return 0;
+
+    switch (method) {
+      case 'pearson':
+        return this.pearsonCorrelation(x, y);
+      case 'spearman':
+        return this.spearmanCorrelation(x, y);
+      case 'kendall':
+        return this.kendallCorrelation(x, y);
+      default:
+        return this.pearsonCorrelation(x, y);
+    }
+  }
+
+  private pearsonCorrelation(x: number[], y: number): number {
+    const n = x.length;
+    if (n === 0) return 0;
+
+    const sumX = x.reduce((a, b) => a + b, 0);
+    const sumY = y.reduce((a, b) => a + b, 0);
+    const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
+    const sumX2 = x.reduce((sum, xi) => sum + xi * xi, 0);
+    const sumY2 = y.reduce((sum, yi) => sum + yi * yi, 0);
+
+    const numerator = n * sumXY - sumX * sumY;
+    const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+
+    return denominator === 0 ? 0 : numerator / denominator;
+  }
+
+  private spearmanCorrelation(x: number[], y: number): number {
+    const rankX = this.getRanks(x);
+    const rankY = this.getRanks(y);
+    return this.pearsonCorrelation(rankX, rankY);
+  }
+
+  private kendallCorrelation(x: number[], y: number): number {
+    const n = x.length;
+    if (n === 0) return 0;
+
+    let concordant = 0;
+    let discordant = 0;
+
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j++) {
+        const diffX = x[i] - x[j];
+        const diffY = y[i] - y[j];
+        
+        if (diffX * diffY > 0) {
+          concordant++;
+        } else if (diffX * diffY < 0) {
+          discordant++;
         }
-      ]
+      }
+    }
+
+    return (concordant - discordant) / (n * (n - 1) / 2);
+  }
+
+  private getRanks(values: number[]): number[] {
+    const indexed = values.map((value, index) => ({ value, index }));
+    indexed.sort((a, b) => a.value - b.value);
+    
+    const ranks = new Array(values.length);
+    indexed.forEach((item, rank) => {
+      ranks[item.index] = rank + 1;
+    });
+    
+    return ranks;
+  }
+
+  private calculateSignificance(
+    correlation: number,
+    sampleSize: number,
+    confidenceLevel: number = 0.95
+  ): { pValue: number; confidenceInterval: [number, number] } {
+    // Fisher's z-transformation for confidence interval
+    const z = Math.atanh(correlation);
+    const se = 1 / Math.sqrt(sampleSize - 3);
+    const zScore = Math.abs(z) / se;
+    
+    // Calculate p-value (two-tailed)
+    const pValue = 2 * (1 - this.normalCDF(zScore));
+    
+    // Calculate confidence interval
+    const zCritical = this.normalQuantile(1 - (1 - confidenceLevel) / 2);
+    const zLower = z - zCritical * se;
+    const zUpper = z + zCritical * se;
+    
+    const confidenceInterval: [number, number] = [
+      Math.tanh(zLower),
+      Math.tanh(zUpper)
+    ];
+
+    return { pValue, confidenceInterval };
+  }
+
+  private normalCDF(x: number): number {
+    return 0.5 * (1 + this.erf(x / Math.sqrt(2)));
+  }
+
+  private normalQuantile(p: number): number {
+    // Approximation of the inverse normal CDF
+    const a1 = -3.969683028665376e+01;
+    const a2 = 2.209460984245205e+02;
+    const a3 = -2.759285104469687e+02;
+    const a4 = 1.383577518672690e+02;
+    const a5 = -3.066479806614716e+01;
+    const a6 = 2.506628277459239e+00;
+
+    const b1 = -5.447609879822406e+01;
+    const b2 = 1.615858368580409e+02;
+    const b3 = -1.556989798598866e+02;
+    const b4 = 6.680131188771972e+01;
+    const b5 = -1.328068155288572e+01;
+
+    const t = Math.sqrt(-2 * Math.log(p));
+    const numerator = a1 + t * (a2 + t * (a3 + t * (a4 + t * (a5 + t * a6))));
+    const denominator = b1 + t * (b2 + t * (b3 + t * (b4 + t * b5)));
+
+    return -numerator / denominator;
+  }
+
+  private erf(x: number): number {
+    // Approximation of the error function
+    const a1 =  0.254829592;
+    const a2 = -0.284496736;
+    const a3 =  1.421413741;
+    const a4 = -1.453152027;
+    const a5 =  1.061405429;
+    const p  =  0.3275911;
+
+    const sign = x >= 0 ? 1 : -1;
+    x = Math.abs(x);
+
+    const t = 1.0 / (1.0 + p * x);
+    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+
+    return sign * y;
+  }
+
+  private removeOutliers(data: Array<{ timestamp: string; value1: number; value2: number }>): Array<{ timestamp: string; value1: number; value2: number }> {
+    const values1 = data.map(d => d.value1);
+    const values2 = data.map(d => d.value2);
+
+    const q1_1 = this.percentile(values1, 25);
+    const q3_1 = this.percentile(values1, 75);
+    const iqr_1 = q3_1 - q1_1;
+    const lowerBound_1 = q1_1 - 1.5 * iqr_1;
+    const upperBound_1 = q3_1 + 1.5 * iqr_1;
+
+    const q1_2 = this.percentile(values2, 25);
+    const q3_2 = this.percentile(values2, 75);
+    const iqr_2 = q3_2 - q1_2;
+    const lowerBound_2 = q1_2 - 1.5 * iqr_2;
+    const upperBound_2 = q3_2 + 1.5 * iqr_2;
+
+    return data.filter(d => 
+      d.value1 >= lowerBound_1 && d.value1 <= upperBound_1 &&
+      d.value2 >= lowerBound_2 && d.value2 <= upperBound_2
+    );
+  }
+
+  private normalizeSignalData(data: Array<{ timestamp: string; value1: number; value2: number }>): Array<{ timestamp: string; value1: number; value2: number }> {
+    const values1 = data.map(d => d.value1);
+    const values2 = data.map(d => d.value2);
+
+    const mean1 = values1.reduce((a, b) => a + b, 0) / values1.length;
+    const std1 = Math.sqrt(values1.reduce((sum, v) => sum + Math.pow(v - mean1, 2), 0) / values1.length);
+
+    const mean2 = values2.reduce((a, b) => a + b, 0) / values2.length;
+    const std2 = Math.sqrt(values2.reduce((sum, v) => sum + Math.pow(v - mean2, 2), 0) / values2.length);
+
+    return data.map(d => ({
+      ...d,
+      value1: (d.value1 - mean1) / std1,
+      value2: (d.value2 - mean2) / std2
+    }));
+  }
+
+  private percentile(values: number[], p: number): number {
+    const sorted = [...values].sort((a, b) => a - b);
+    const index = (p / 100) * (sorted.length - 1);
+    const lower = Math.floor(index);
+    const upper = Math.ceil(index);
+    const weight = index % 1;
+
+    if (upper >= sorted.length) return sorted[sorted.length - 1];
+    return sorted[lower] * (1 - weight) + sorted[upper] * weight;
+  }
+
+  private applyLag(data: Array<{ timestamp: string; value1: number; value2: number }>, lagPeriod: number): Array<{ timestamp: string; value1: number; value2: number }> {
+    if (lagPeriod <= 0 || lagPeriod >= data.length) return data;
+
+    return data.slice(lagPeriod).map((item, index) => ({
+      timestamp: item.timestamp,
+      value1: item.value1,
+      value2: data[index].value2
+    }));
+  }
+
+  private calculateTrendDirection(correlations: number[]): 'increasing' | 'decreasing' | 'stable' {
+    if (correlations.length < 2) return 'stable';
+
+    const firstHalf = correlations.slice(0, Math.floor(correlations.length / 2));
+    const secondHalf = correlations.slice(Math.floor(correlations.length / 2));
+
+    const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
+    const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
+
+    const difference = secondAvg - firstAvg;
+    const threshold = 0.1; // 10% change threshold
+
+    if (difference > threshold) return 'increasing';
+    if (difference < -threshold) return 'decreasing';
+    return 'stable';
+  }
+
+  private findOptimalLag(data: Array<{ timestamp: string; value1: number; value2: number }>): number {
+    let maxCorrelation = 0;
+    let optimalLag = 0;
+
+    for (let lag = 0; lag < Math.min(30, data.length / 2); lag++) {
+      const laggedData = this.applyLag(data, lag);
+      if (laggedData.length < 10) continue;
+
+      const correlation = Math.abs(this.calculateCorrelation(
+        laggedData.map(d => d.value1),
+        laggedData.map(d => d.value2)
+      ));
+
+      if (correlation > maxCorrelation) {
+        maxCorrelation = correlation;
+        optimalLag = lag;
+      }
+    }
+
+    return optimalLag;
+  }
+
+  private performStationarityTests(correlations: number[]): {
+    augmented_dickey_fuller: number;
+    phillips_perron: number;
+    kpss: number;
+  } {
+    // Simplified implementations of stationarity tests
+    // In production, these would use proper statistical libraries
+    
+    const n = correlations.length;
+    if (n < 10) {
+      return {
+        augmented_dickey_fuller: 1.0,
+        phillips_perron: 1.0,
+        kpss: 0.1
+      };
+    }
+
+    // Simple approximations
+    const diff = correlations.slice(1).map((c, i) => c - correlations[i]);
+    const diffMean = diff.reduce((a, b) => a + b, 0) / diff.length;
+    const diffVar = diff.reduce((sum, d) => sum + Math.pow(d - diffMean, 2), 0) / diff.length;
+
+    return {
+      augmented_dickey_fuller: Math.max(0.01, 1 - diffVar),
+      phillips_perron: Math.max(0.01, 1 - diffVar * 0.9),
+      kpss: Math.min(0.99, diffVar * 2)
     };
   }
 
-  /**
-   * Store market odds in database
-   */
-  private static async storeMarketOdds(matchId: string, oddsData: unknown[]): Promise<MarketOdds[]> {
-    const storedOdds: MarketOdds[] = [];
-
-    for (const odds of oddsData) {
-      const { data, error } = await supabase
-        .from('market_odds')
-        .upsert({
-          match_id: matchId,
-          bookmaker: odds.bookmaker,
-          home_win_odds: odds.home_win_odds,
-          draw_odds: odds.draw_odds,
-          away_win_odds: odds.away_win_odds,
-          over_2_5_odds: odds.over_2_5_odds,
-          under_2_5_odds: odds.under_2_5_odds,
-          btts_yes_odds: odds.btts_yes_odds,
-          btts_no_odds: odds.btts_no_odds,
-          last_updated: new Date().toISOString(),
-          api_source: 'odds-api',
-          raw_response: odds
-        }, { onConflict: 'match_id,bookmaker' })
-        .select()
-        .single();
-
-      if (error) throw error;
-      storedOdds.push(data as MarketOdds);
-    }
-
-    return storedOdds;
+  private async fetchExternalSignals(options: MarketSignalsFetchOptions): Promise<MarketSignal[]> {
+    // Placeholder for external signal fetching
+    // In production, this would integrate with external APIs
+    return [];
   }
 
-  /**
-   * Get outcome probability from model prediction
-   */
-  private static getOutcomeProbability(prediction: UserPrediction, outcome: string): number {
-    // In a real implementation, this would extract the probability for the specific outcome
-    // For now, we'll use a simplified approach based on confidence score
-    const baseProb = prediction.confidence_score / 100;
+  private getOutcomeProbability(prediction: any, outcome: string): number | null {
+    // Extract probability from prediction based on outcome type
+    switch (outcome) {
+      case 'home_win':
+        return prediction.home_win_probability || null;
+      case 'draw':
+        return prediction.draw_probability || null;
+      case 'away_win':
+        return prediction.away_win_probability || null;
+      case 'over_2_5':
+        return prediction.over_2_5_probability || null;
+      case 'under_2_5':
+        return prediction.under_2_5_probability || null;
+      case 'btts_yes':
+        return prediction.btts_yes_probability || null;
+      case 'btts_no':
+        return prediction.btts_no_probability || null;
+      default:
+        return null;
+    }
+  }
+
+  private calculateKellyFraction(expectedValue: number, probability: number): number {
+    // Kelly criterion: f* = (bp - q) / b
+    // where b = odds - 1, p = probability of winning, q = probability of losing
+    const odds = 1 / probability;
+    const b = odds - 1;
+    const p = probability;
+    const q = 1 - p;
+
+    const kellyFraction = (b * p - q) / b;
     
-    if (prediction.predicted_outcome === outcome) {
-      return baseProb;
-    } else {
-      // Distribute remaining probability among other outcomes
-      return (1 - baseProb) / 2;
-    }
+    // Cap at 25% of bankroll and ensure positive
+    return Math.max(0, Math.min(0.25, kellyFraction));
   }
 
-  /**
-   * Calculate expected value
-   */
-  private static calculateExpectedValue(odds: number, modelProbability: number): number {
-    return (modelProbability * odds) - 1;
-  }
+  private getConfidenceLevel(
+    predictionConfidence: number,
+    correlationStrength: number,
+    expectedValue: number
+  ): 'high' | 'medium' | 'low' {
+    const combinedScore = (predictionConfidence * 0.4) + (correlationStrength * 0.3) + (Math.min(expectedValue * 2, 1) * 0.3);
 
-  /**
-   * Calculate Kelly Criterion fraction
-   */
-  private static calculateKellyFraction(odds: number, modelProbability: number): number {
-    const edge = (modelProbability * odds) - 1;
-    return Math.max(0, Math.min(1, edge / (odds - 1)));
-  }
-
-  /**
-   * Get confidence level based on EV and Kelly
-   */
-  private static getConfidenceLevel(ev: number, kelly: number): 'low' | 'medium' | 'high' {
-    if (ev > 0.15 && kelly > 0.1) return 'high';
-    if (ev > 0.08 && kelly > 0.05) return 'medium';
+    if (combinedScore >= 0.8) return 'high';
+    if (combinedScore >= 0.6) return 'medium';
     return 'low';
   }
 }
 
-// 9.3 Temporal Decay API Services
-
-export class TemporalDecayService {
-  /**
-   * Calculate freshness score for data
-   */
-  static async calculateFreshnessScore(
-    tableName: string,
-    recordId: string,
-    decayRate?: number
-  ): Promise<FreshnessScoreResponse> {
-    try {
-      const { data, error } = await supabase
-        .from('information_freshness')
-        .select('*')
-        .eq('table_name', tableName)
-        .eq('record_id', recordId)
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error;
-
-      let freshness: InformationFreshness;
-      
-      if (data) {
-        freshness = data as InformationFreshness;
-      } else {
-        // Create new freshness record
-        const newFreshness = await this.createFreshnessRecord(tableName, recordId, decayRate);
-        if (!newFreshness.success) {
-          throw new Error(newFreshness.error);
-        }
-        freshness = newFreshness.freshness!;
-      }
-
-      // Calculate current freshness score using database function
-      const { data: scoreData, error: scoreError } = await supabase.rpc('calculate_freshness_score', {
-        last_updated: freshness.last_updated,
-        decay_rate: freshness.decay_rate
-      });
-
-      if (scoreError) throw scoreError;
-
-      const freshnessScore = scoreData;
-      const isStale = freshnessScore < 0.5; // Consider stale if freshness < 50%
-
-      // Update the freshness record
-      await supabase
-        .from('information_freshness')
-        .update({
-          freshness_score: freshnessScore,
-          is_stale: isStale
-        })
-        .eq('id', freshness.id);
-
-      return {
-        success: true,
-        freshness_score: freshnessScore,
-        is_stale: isStale
-      };
-    } catch (error) {
-      console.error('Error calculating freshness score:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to calculate freshness score'
-      };
-    }
-  }
-
-  /**
-   * Check for stale data and refresh if needed
-   */
-  static async checkAndRefreshStaleData(): Promise<StaleDataCheckResponse> {
-    try {
-      // Get all stale records
-      const { data: staleRecords, error: fetchError } = await supabase
-        .from('information_freshness')
-        .select('*')
-        .eq('is_stale', true);
-
-      if (fetchError) throw fetchError;
-
-      let refreshedCount = 0;
-
-      // Refresh each stale record
-      for (const record of staleRecords as InformationFreshness[]) {
-        const refreshResult = await this.refreshStaleRecord(record);
-        if (refreshResult.success) {
-          refreshedCount++;
-        }
-      }
-
-      return {
-        success: true,
-        staleRecords: staleRecords as InformationFreshness[],
-        refreshedCount
-      };
-    } catch (error) {
-      console.error('Error checking stale data:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to check stale data'
-      };
-    }
-  }
-
-  /**
-   * Create a new freshness record
-   */
-  private static async createFreshnessRecord(
-    tableName: string,
-    recordId: string,
-    decayRate?: number
-  ): Promise<{ success: boolean; freshness?: InformationFreshness; error?: string }> {
-    try {
-      // Determine data type and default decay rate
-      let dataType: string;
-      let defaultDecayRate: number;
-      let staleThresholdDays: number;
-
-      switch (tableName) {
-        case 'matches':
-          dataType = 'match';
-          defaultDecayRate = 0.05;
-          staleThresholdDays = 3;
-          break;
-        case 'predictions':
-          dataType = 'user_prediction';
-          defaultDecayRate = 0.1;
-          staleThresholdDays = 7;
-          break;
-        case 'market_odds':
-          dataType = 'odds';
-          defaultDecayRate = 0.5;
-          staleThresholdDays = 1;
-          break;
-        default:
-          dataType = 'pattern';
-          defaultDecayRate = 0.15;
-          staleThresholdDays = 5;
-      }
-
-      const { data, error } = await supabase
-        .from('information_freshness')
-        .insert({
-          table_name: tableName,
-          record_id: recordId,
-          data_type: dataType as 'match' | 'team_stats' | 'pattern' | 'odds' | 'user_prediction',
-          last_updated: new Date().toISOString(),
-          decay_rate: decayRate || defaultDecayRate,
-          freshness_score: 1.0,
-          is_stale: false,
-          stale_threshold_days: staleThresholdDays
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      return {
-        success: true,
-        freshness: data as InformationFreshness
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to create freshness record'
-      };
-    }
-  }
-
-  /**
-   * Refresh a stale record
-   */
-  private static async refreshStaleRecord(
-    record: InformationFreshness
-  ): Promise<{ success: boolean; error?: string }> {
-    try {
-      // In a real implementation, this would trigger data refresh based on the table type
-      // For now, we'll just update the last_updated timestamp
-      
-      const { error } = await supabase
-        .from('information_freshness')
-        .update({
-          last_updated: new Date().toISOString(),
-          freshness_score: 1.0,
-          is_stale: false
-        })
-        .eq('id', record.id);
-
-      if (error) throw error;
-
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to refresh stale record'
-      };
-    }
-  }
-}
-
-// 9.4 Self-Improving System API Services
-
-export class SelfImprovingSystemService {
-  /**
-   * Generate new features through automated feature engineering
-   */
-  static async generateNewFeatures(
-    request: FeatureGenerationRequest
-  ): Promise<FeatureGenerationResponse> {
-    try {
-      const experiments: FeatureExperiment[] = [];
-
-      // Generate different types of features
-      for (const featureType of request.feature_types) {
-        const typeExperiments = await this.generateFeaturesByType(
-          featureType,
-          request.base_features,
-          request.sample_size || 1000,
-          request.test_duration_days || 30
-        );
-
-        experiments.push(...typeExperiments);
-      }
-
-      // Store experiments in database
-      if (experiments.length > 0) {
-        const { data: storedExperiments, error: storeError } = await supabase
-          .from('feature_experiments')
-          .insert(experiments)
-          .select();
-
-        if (storeError) throw storeError;
-
-        return {
-          success: true,
-          experiments: storedExperiments as FeatureExperiment[]
-        };
-      }
-
-      return {
-        success: true,
-        experiments: []
-      };
-    } catch (error) {
-      console.error('Error generating new features:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to generate new features'
-      };
-    }
-  }
-
-  /**
-   * Run continuous learning pipeline
-   */
-  static async runContinuousLearning(): Promise<ContinuousLearningResponse> {
-    try {
-      let experimentsGenerated = 0;
-      let experimentsCompleted = 0;
-      let featuresApproved = 0;
-      let modelAccuracyImprovement = 0;
-
-      // Step 1: Generate new feature experiments
-      const generationRequest: FeatureGenerationRequest = {
-        feature_types: ['polynomial', 'interaction', 'ratio'],
-        base_features: ['home_form', 'away_form', 'h2h_record', 'league_avg_goals'],
-        sample_size: 2000,
-        test_duration_days: 14
-      };
-
-      const generationResult = await this.generateNewFeatures(generationRequest);
-      if (generationResult.success && generationResult.experiments) {
-        experimentsGenerated = generationResult.experiments.length;
-
-        // Step 2: Test each experiment
-        for (const experiment of generationResult.experiments) {
-          const testResult = await this.testFeature(experiment.id);
-          if (testResult.success) {
-            experimentsCompleted++;
-
-            // Step 3: Approve successful features
-            if (testResult.result!.recommendation === 'approve') {
-              await this.approveFeature(experiment.id);
-              featuresApproved++;
-            }
-          }
-        }
-      }
-
-      // Step 4: Calculate model accuracy improvement
-      const improvementResult = await this.calculateModelImprovement();
-      if (improvementResult.success) {
-        modelAccuracyImprovement = improvementResult.improvement || 0;
-      }
-
-      return {
-        success: true,
-        results: {
-          experimentsGenerated,
-          experimentsCompleted,
-          featuresApproved,
-          modelAccuracyImprovement
-        }
-      };
-    } catch (error) {
-      console.error('Error running continuous learning:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to run continuous learning'
-      };
-    }
-  }
-
-  /**
-   * Test a specific feature experiment
-   */
-  static async testFeature(
-    experimentId: string
-  ): Promise<{ success: boolean; result?: FeatureTestResult; error?: string }> {
-    try {
-      // Get experiment details
-      const { data: experiment, error: fetchError } = await supabase
-        .from('feature_experiments')
-        .select('*')
-        .eq('id', experimentId)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      // Simulate A/B testing - in real implementation, this would run actual tests
-      const controlAccuracy = 65 + Math.random() * 10; // 65-75%
-      const testAccuracy = controlAccuracy + (Math.random() - 0.3) * 5; // -1.5% to +3.5%
-      const improvement = testAccuracy - controlAccuracy;
-      const pValue = Math.random(); // Simulated p-value
-
-      const statisticalSignificance = pValue < 0.05 && improvement > 0;
-
-      let recommendation: 'approve' | 'reject' | 'continue_testing';
-      if (statisticalSignificance && improvement > 2) {
-        recommendation = 'approve';
-      } else if (improvement > 0 && pValue < 0.1) {
-        recommendation = 'continue_testing';
-      } else {
-        recommendation = 'reject';
-      }
-
-      // Update experiment with results
-      const { error: updateError } = await supabase
-        .from('feature_experiments')
-        .update({
-          test_end_date: new Date().toISOString(),
-          sample_size: Math.floor(Math.random() * 1000) + 500,
-          control_accuracy: controlAccuracy,
-          test_accuracy: testAccuracy,
-          improvement_delta: improvement,
-          p_value: pValue,
-          statistical_significance: statisticalSignificance,
-          is_active: false
-        })
-        .eq('id', experimentId);
-
-      if (updateError) throw updateError;
-
-      const result = {
-        experiment_id: experimentId,
-        control_accuracy: controlAccuracy,
-        test_accuracy: testAccuracy,
-        improvement_delta: improvement,
-        p_value: pValue,
-        statistical_significance: statisticalSignificance,
-        recommendation
-      };
-
-      return {
-        success: true,
-        result
-      };
-    } catch (error) {
-      console.error('Error testing feature:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to test feature'
-      };
-    }
-  }
-
-  /**
-   * Generate features by type
-   */
-  private static async generateFeaturesByType(
-    featureType: string,
-    baseFeatures: string[],
-    sampleSize: number,
-    testDurationDays: number
-  ): Promise<FeatureExperiment[]> {
-    const experiments: FeatureExperiment[] = [];
-
-    switch (featureType) {
-      case 'polynomial':
-        // Generate polynomial features (e.g., x², x³)
-        for (const feature of baseFeatures) {
-          for (let degree = 2; degree <= 3; degree++) {
-            experiments.push({
-              id: '', // Will be set by database
-              experiment_name: `${feature}_poly_${degree}`,
-              feature_type: 'polynomial',
-              base_features: { features: [feature] },
-              generated_feature: { 
-                name: `${feature}_power_${degree}`,
-                description: `Polynomial feature: ${feature}^${degree}`
-              },
-              feature_expression: `${feature}^${degree}`,
-              test_start_date: new Date().toISOString(),
-              test_end_date: new Date(Date.now() + testDurationDays * 24 * 60 * 60 * 1000).toISOString(),
-              sample_size: sampleSize,
-              statistical_significance: false,
-              is_active: true,
-              is_approved: false,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            });
-          }
-        }
-        break;
-
-      case 'interaction':
-        // Generate interaction features (e.g., x₁ * x₂)
-        for (let i = 0; i < baseFeatures.length; i++) {
-          for (let j = i + 1; j < baseFeatures.length; j++) {
-            experiments.push({
-              id: '',
-              experiment_name: `${baseFeatures[i]}_x_${baseFeatures[j]}`,
-              feature_type: 'interaction',
-              base_features: { features: [baseFeatures[i], baseFeatures[j]] },
-              generated_feature: {
-                name: `${baseFeatures[i]}_${baseFeatures[j]}_interaction`,
-                description: `Interaction feature: ${baseFeatures[i]} * ${baseFeatures[j]}`
-              },
-              feature_expression: `${baseFeatures[i]} * ${baseFeatures[j]}`,
-              test_start_date: new Date().toISOString(),
-              test_end_date: new Date(Date.now() + testDurationDays * 24 * 60 * 60 * 1000).toISOString(),
-              sample_size: sampleSize,
-              statistical_significance: false,
-              is_active: true,
-              is_approved: false,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            });
-          }
-        }
-        break;
-
-      case 'ratio':
-        // Generate ratio features (e.g., x₁ / x₂)
-        for (let i = 0; i < baseFeatures.length; i++) {
-          for (let j = 0; j < baseFeatures.length; j++) {
-            if (i !== j) {
-              experiments.push({
-                id: '',
-                experiment_name: `${baseFeatures[i]}_div_${baseFeatures[j]}`,
-                feature_type: 'ratio',
-                base_features: { features: [baseFeatures[i], baseFeatures[j]] },
-                generated_feature: {
-                  name: `${baseFeatures[i]}_to_${baseFeatures[j]}_ratio`,
-                  description: `Ratio feature: ${baseFeatures[i]} / ${baseFeatures[j]}`
-                },
-                feature_expression: `${baseFeatures[i]} / (${baseFeatures[j]} + 1)`, // +1 to avoid division by zero
-                test_start_date: new Date().toISOString(),
-                test_end_date: new Date(Date.now() + testDurationDays * 24 * 60 * 60 * 1000).toISOString(),
-                sample_size: sampleSize,
-                statistical_significance: false,
-                is_active: true,
-                is_approved: false,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              });
-            }
-          }
-        }
-        break;
-    }
-
-    return experiments;
-  }
-
-  /**
-   * Approve a feature for production use
-   */
-  private static async approveFeature(experimentId: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      const { error } = await supabase
-        .from('feature_experiments')
-        .update({
-          is_approved: true
-        })
-        .eq('id', experimentId);
-
-      if (error) throw error;
-
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to approve feature'
-      };
-    }
-  }
-
-  /**
-   * Calculate model accuracy improvement
-   */
-  private static async calculateModelImprovement(): Promise<{ success: boolean; improvement?: number; error?: string }> {
-    try {
-      // In a real implementation, this would compare model performance before and after
-      // adding approved features. For now, we'll simulate it.
-      
-      const { data: approvedFeatures, error } = await supabase
-        .from('feature_experiments')
-        .select('improvement_delta')
-        .eq('is_approved', true)
-        .not('improvement_delta', 'is', null);
-
-      if (error) throw error;
-
-      const totalImprovement = approvedFeatures?.reduce((sum: number, feature: { improvement_delta: number | null }) => 
-        sum + (feature.improvement_delta || 0), 0) || 0;
-
-      return {
-        success: true,
-        improvement: totalImprovement
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to calculate model improvement'
-      };
-    }
-  }
-}
-
-// Services are already exported at their class definitions
+export const MarketCorrelationService = new MarketCorrelationService();
