@@ -351,4 +351,344 @@ export interface PerformanceMetrics {
   throughput: number;
 }
 
+// Market Signal Correlation Analysis Types
+export interface MarketSignal {
+  id: string;
+  signal_type: 'odds_movement' | 'volume_change' | 'social_sentiment' | 'prediction_accuracy' | 'weather_impact' | 'team_news';
+  timestamp: string;
+  value: number;
+  metadata: Record<string, unknown>;
+  match_id?: string;
+  league_id?: string;
+  bookmaker?: string;
+  source: string;
+}
+
+export interface SignalCorrelationResult {
+  signal1: string;
+  signal2: string;
+  correlation_coefficient: number;
+  p_value: number;
+  sample_size: number;
+  confidence_interval: [number, number];
+  method: 'pearson' | 'spearman' | 'kendall';
+  lag_period?: number;
+  significance_level: number;
+  is_significant: boolean;
+}
+
+export interface SignalCorrelationMatrix {
+  signals: string[];
+  correlations: SignalCorrelationResult[];
+  metadata: {
+    total_signals: number;
+    analysis_period: {
+      start: string;
+      end: string;
+    };
+    method: string;
+    confidence_level: number;
+  };
+}
+
+export interface TimeSeriesCorrelation {
+  signal1: string;
+  signal2: string;
+  overall_correlation: number;
+  optimal_lag: number;
+  trend_direction: 'increasing' | 'decreasing' | 'stable';
+  data_points: Array<{
+    date: string;
+    signal1_value: number;
+    signal2_value: number;
+    correlation: number;
+  }>;
+  significance_tests: {
+    augmented_dickey_fuller: number;
+    phillips_perron: number;
+    kpss: number;
+  };
+}
+
+export interface CrossLeagueCorrelation {
+  source_league: string;
+  target_league: string;
+  signal_type: string;
+  correlation_coefficient: number;
+  significance_score: number;
+  sample_size: number;
+  time_lag: number;
+  confidence_level: number;
+}
+
+export interface MarketCorrelationAnalysisOptions {
+  method?: 'pearson' | 'spearman' | 'kendall';
+  confidenceLevel?: number;
+  minPeriods?: number;
+  includeLagCorrelations?: boolean;
+  lagPeriods?: number[];
+  seasonalAdjustment?: boolean;
+  outlierRemoval?: boolean;
+  normalizeData?: boolean;
+}
+
+export interface MarketSignalsFetchOptions {
+  leagueId?: string;
+  timeRange?: '7d' | '30d' | '90d' | '1y';
+  signalTypes?: string[];
+  minConfidence?: number;
+  includeInactive?: boolean;
+}
+
+export interface ValueBetOpportunity {
+  id: string;
+  match_id: string;
+  bookmaker: string;
+  bet_type: string;
+  odds: number;
+  model_probability: number;
+  implied_probability: number;
+  expected_value: number;
+  confidence_level: 'high' | 'medium' | 'low';
+  kelly_fraction: number;
+  detection_timestamp: string;
+  market_signals: string[];
+  correlation_strength: number;
+}
+
+export interface MarketArbitrageOpportunity {
+  id: string;
+  match_id: string;
+  outcome: string;
+  bookmaker_1: string;
+  odds_1: number;
+  bookmaker_2: string;
+  odds_2: number;
+  arbitrage_percentage: number;
+  total_investment: number;
+  profit_potential: number;
+  confidence_score: number;
+  detection_timestamp: string;
+  market_inefficiency_score: number;
+}
+
+// Public API Types
+export interface APIKey {
+  id: string;
+  key_hash: string;
+  name: string;
+  tier: 'free' | 'basic' | 'premium' | 'enterprise';
+  rate_limit: number;
+  is_active: boolean;
+  expires_at?: string;
+  created_at: string;
+  last_used?: string;
+  usage_count: number;
+}
+
+export interface APIUsage {
+  total_requests: number;
+  requests_today: number;
+  requests_this_hour: number;
+  endpoint_usage: Record<string, number>;
+  last_request: string;
+}
+
+export interface APIRateLimit {
+  limit: number;
+  remaining: number;
+  reset_time: number;
+  retry_after?: number;
+}
+
+export interface APIResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+  pagination?: {
+    total: number;
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+  metadata?: {
+    timestamp: string;
+    version: string;
+    requestId: string;
+    processingTime: number;
+  };
+}
+
+// Security Types
+export interface TwoFactorSetup {
+  secret: string;
+  qr_code: string;
+  backup_codes: string[];
+  instructions: string[];
+}
+
+export interface TwoFactorVerification {
+  user_id: string;
+  token: string;
+  backup_code?: string;
+}
+
+export interface SAMLIdentity {
+  name_id: string;
+  email: string;
+  attributes: Record<string, string>;
+  session_index: string;
+}
+
+export interface SecuritySession {
+  id: string;
+  user_id: string;
+  auth_method: 'password' | '2fa' | 'saml';
+  created_at: string;
+  expires_at: string;
+  last_activity: string;
+  ip_address: string;
+  user_agent: string;
+  is_active: boolean;
+}
+
+// Advanced Analytics Types
+export interface PredictionAccuracyMetrics {
+  model_id: string;
+  time_period: string;
+  total_predictions: number;
+  correct_predictions: number;
+  accuracy: number;
+  precision: number;
+  recall: number;
+  f1_score: number;
+  roi: number;
+  confidence_calibration: {
+    low_confidence_accuracy: number;
+    medium_confidence_accuracy: number;
+    high_confidence_accuracy: number;
+  };
+}
+
+export interface ModelPerformanceComparison {
+  model_1_id: string;
+  model_2_id: string;
+  comparison_period: string;
+  metrics: {
+    accuracy_delta: number;
+    precision_delta: number;
+    recall_delta: number;
+    f1_delta: number;
+    roi_delta: number;
+    statistical_significance: number;
+    confidence_interval: [number, number];
+  };
+  recommendation: 'model_1' | 'model_2' | 'inconclusive';
+  confidence_level: string;
+}
+
+export interface MarketEfficiencyAnalysis {
+  league_id: string;
+  time_period: string;
+  efficiency_metrics: {
+    bookmaker_margin_avg: number;
+    market_liquidity_score: number;
+    price_volatility: number;
+    information_asymmetry: number;
+  };
+  inefficiency_opportunities: Array<{
+    match_id: string;
+    opportunity_type: 'value_bet' | 'arbitrage' | 'timing';
+    potential_return: number;
+    confidence_score: number;
+    risk_factors: string[];
+  }>;
+}
+
+// Real-time Collaboration Types
+export interface CollaborativeSession {
+  id: string;
+  match_id: string;
+  participants: Array<{
+    user_id: string;
+    name: string;
+    role: 'analyst' | 'reviewer' | 'viewer';
+    joined_at: string;
+    last_activity: string;
+  }>;
+  shared_predictions: Array<{
+    user_id: string;
+    prediction: unknown;
+    comments: Array<{
+      user_id: string;
+      comment: string;
+      timestamp: string;
+    }>;
+    confidence_adjustments: Array<{
+      user_id: string;
+      original_confidence: number;
+      adjusted_confidence: number;
+      reason: string;
+      timestamp: string;
+    }>;
+  }>;
+  consensus_metrics: {
+    agreement_score: number;
+    confidence_variance: number;
+    prediction_distribution: Record<string, number>;
+  };
+  created_at: string;
+  expires_at: string;
+}
+
+export interface RealTimeUpdate {
+  type: 'prediction' | 'odds' | 'comment' | 'participant' | 'consensus';
+  session_id: string;
+  user_id: string;
+  data: unknown;
+  timestamp: string;
+}
+
+// Monitoring and Observability Types
+export interface PerformanceMetric {
+  name: string;
+  value: number;
+  unit: string;
+  timestamp: string;
+  tags: Record<string, string>;
+  threshold?: {
+    warning: number;
+    critical: number;
+  };
+}
+
+export interface SystemHealth {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  checks: Array<{
+    name: string;
+    status: 'pass' | 'fail' | 'warn';
+    response_time?: number;
+    error?: string;
+    last_check: string;
+  }>;
+  overall_score: number;
+  uptime_percentage: number;
+  last_updated: string;
+}
+
+export interface ErrorTrace {
+  error_id: string;
+  timestamp: string;
+  level: 'error' | 'warning' | 'info';
+  message: string;
+  stack_trace: string;
+  context: Record<string, unknown>;
+  user_id?: string;
+  session_id?: string;
+  request_id?: string;
+  resolved: boolean;
+  resolution_notes?: string;
+}
+
 // Types are exported at their definitions above
