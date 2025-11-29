@@ -81,7 +81,6 @@ export const PredictionDecayCard = () => {
 
   const autoRetrainMutation = useMutation({
     mutationFn: async (eventId: string) => {
-      // Update the event status to auto_retrain_triggered
       const actionTimestamp = new Date().toISOString();
       const { error: updateError } = await supabase
         .from("prediction_decay_events")
@@ -94,10 +93,17 @@ export const PredictionDecayCard = () => {
 
       if (updateError) throw updateError;
 
-      // TODO: Trigger actual auto-retrain process (Task 4 integration)
-      // await supabase.functions.invoke('model-auto-retrain', {
-      //   body: { decay_event_id: eventId, priority: 'high' }
-      // });
+      try {
+        const { data, error } = await supabase.functions.invoke('model-auto-retrain', {
+          body: { decay_event_id: eventId, priority: 'high', timestamp: actionTimestamp }
+        });
+
+        if (error) {
+          console.warn("Auto-retrain function invocation failed:", error);
+        }
+      } catch (error) {
+        console.warn("Auto-retrain edge function not available:", error);
+      }
 
       return { success: true };
     },

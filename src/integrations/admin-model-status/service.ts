@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import logger from "@/lib/logger";
 import type {
   SystemStatusResponse,
   AnalyticsResponse,
@@ -27,7 +28,7 @@ export async function getSystemStatus(): Promise<SystemStatusResponse> {
     if (error) throw new AdminModelStatusError(error.message);
     return data as SystemStatusResponse;
   } catch (error) {
-    console.error("Error fetching system status:", error);
+    logger.error("Error fetching system status", error, {}, "AdminModelStatus");
     throw error;
   }
 }
@@ -45,7 +46,7 @@ export async function getAnalytics(windowDays?: number): Promise<AnalyticsRespon
     if (error) throw new AdminModelStatusError(error.message);
     return data as AnalyticsResponse;
   } catch (error) {
-    console.error("Error fetching analytics:", error);
+    logger.error("Error fetching analytics", error, { windowDays }, "AdminModelStatus");
     throw error;
   }
 }
@@ -65,7 +66,7 @@ export async function promoteModel(
     if (error) throw new AdminModelStatusError(error.message);
     return data as PromoteModelResponse;
   } catch (error) {
-    console.error("Error promoting model:", error);
+    logger.error("Error promoting model", error, { request }, "AdminModelStatus");
     throw error;
   }
 }
@@ -85,7 +86,7 @@ export async function triggerTraining(
     if (error) throw new AdminModelStatusError(error.message);
     return data as TrainingResponse;
   } catch (error) {
-    console.error("Error triggering training:", error);
+    logger.error("Error triggering training", error, { request }, "AdminModelStatus");
     throw error;
   }
 }

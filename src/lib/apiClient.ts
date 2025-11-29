@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { apiOrigins, env } from '@/config/env';
+import logger from '@/lib/logger';
 import type { Database } from '@/integrations/supabase/types';
 
 // API response wrapper
@@ -44,11 +45,10 @@ export async function callEdgeFunction<T = unknown>(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-    // Get auth session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError) {
-      console.warn('Error getting session for edge function call:', sessionError);
+      logger.warn('Error getting session for edge function call', { error: sessionError, functionName }, 'EdgeFunction');
     }
 
     // Build headers with auth
@@ -84,7 +84,7 @@ export async function callEdgeFunction<T = unknown>(
     clearTimeout(timeoutId);
 
     if (error) {
-      console.error(`Edge function ${functionName} error:`, error);
+      logger.error(`Edge function ${functionName} error`, error, { functionName, method }, 'EdgeFunction');
       return {
         error: error.message || `Edge function ${functionName} failed`,
         status: error.status || 500,
@@ -98,7 +98,7 @@ export async function callEdgeFunction<T = unknown>(
       success: true,
     };
   } catch (err: unknown) {
-    console.error(`Edge function ${functionName} unexpected error:`, err);
+    logger.error(`Edge function ${functionName} unexpected error`, err, { functionName, method }, 'EdgeFunction');
     
     if (err instanceof Error) {
       if (err.name === 'AbortError') {
@@ -165,7 +165,7 @@ export class SupabaseClient {
     const { data, error } = await query;
     
     if (error) {
-      console.error(`Supabase select error on ${table}:`, error);
+      logger.error(`Supabase select error on ${String(table)}`, error, { table, options }, 'SupabaseClient');
       return { data: null, error };
     }
 
@@ -183,7 +183,7 @@ export class SupabaseClient {
       .single();
 
     if (error) {
-      console.error(`Supabase insert error on ${String(table)}:`, error);
+      logger.error(`Supabase insert error on ${String(table)}`, error, { table }, 'SupabaseClient');
       return { data: null, error };
     }
 
@@ -203,7 +203,7 @@ export class SupabaseClient {
       .single();
 
     if (error) {
-      console.error(`Supabase update error on ${String(table)}:`, error);
+      logger.error(`Supabase update error on ${String(table)}`, error, { table, id }, 'SupabaseClient');
       return { data: null, error };
     }
 
@@ -217,7 +217,7 @@ export class SupabaseClient {
     const { error } = await this.client.from(table).delete().eq('id', id);
 
     if (error) {
-      console.error(`Supabase delete error on ${String(table)}:`, error);
+      logger.error(`Supabase delete error on ${String(table)}`, error, { table, id }, 'SupabaseClient');
       return { error };
     }
 

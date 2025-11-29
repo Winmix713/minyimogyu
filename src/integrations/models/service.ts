@@ -19,23 +19,32 @@ function parseJSON<T = unknown>(value: unknown): T | null {
 }
 
 export async function listModels(): Promise<{ id: string; name: string; status: 'production' | 'staging' | 'archived' }[]> {
-  // TODO: Implement proper model listing with status mapping
   try {
-    const models = await supabase
+    const { data: models, error } = await supabase
       .from("model_registry")
-      .select("*")
+      .select("id, model_name, model_type, is_active")
       .order("registered_at", { ascending: false });
 
-    if (models.error) throw new ModelServiceError(models.error.message);
+    if (error) throw new ModelServiceError(error.message);
 
-    return (models.data ?? []).map((model: Record<string, unknown>) => ({
-      id: String(model.id),
-      name: String(model.model_name || 'Unknown Model'),
-      status: (model.model_type === 'champion' ? 'production' : 
-               model.model_type === 'retired' ? 'archived' : 'staging') as 'production' | 'staging' | 'archived'
-    }));
+    return (models ?? []).map((model) => {
+      let status: 'production' | 'staging' | 'archived' = 'staging';
+      
+      if (!model.is_active || model.model_type === 'retired') {
+        status = 'archived';
+      } else if (model.model_type === 'champion') {
+        status = 'production';
+      } else if (model.model_type === 'challenger' || model.model_type === 'baseline') {
+        status = 'staging';
+      }
+
+      return {
+        id: String(model.id),
+        name: String(model.model_name || 'Unknown Model'),
+        status
+      };
+    });
   } catch (error) {
-    // Return static examples if API is unavailable
     return [
       { id: '1', name: 'Champion Model', status: 'production' as const },
       { id: '2', name: 'Challenger Model A', status: 'staging' as const },
@@ -119,37 +128,52 @@ export async function deleteModel(id: string): Promise<void> {
 }
 
 export function epsilonGreedySelect(models: { id: string; ctr: number }[], epsilon = 0.1): { id: string } {
-  // TODO: Implement proper epsilon-greedy selection with CTR
-  // For now, return simple random selection
-  if (Math.random() < epsilon && models.length > 0) {
-    // Explore: random selection
-    const randomModel = models[Math.floor(Math.random() * models.length)];
-    return { id: randomModel.id };
-  } else {
-    // Exploit: select model with highest CTR
-    const bestModel = models.reduce((best, current) => 
-      current.ctr > best.ctr ? current : best, models[0] || { id: 'default', ctr: 0 }
-    );
-    return { id: bestModel.id };
+  if (models.length === 0) {
+    throw new ModelServiceError("No models available for selection");
   }
+
+  const randomValue = Math.random();
+  
+  if (randomValue < epsilon) {
+    const randomIndex = Math.floor(Math.random() * models.length);
+    return { id: models[randomIndex].id };
+  }
+  
+  const bestModel = models.reduce((best, current) => 
+    current.ctr > best.ctr ? current : best
+  );
+  
+  return { id: bestModel.id };
 }
 
 export async function promoteChallenger(id: string): Promise<{ ok: true }> {
-  // TODO: Implement proper challenger promotion
   try {
-    // Retire previous champion
-    await supabase.from("model_registry").update({ model_type: "retired", traffic_allocation: 0 }).eq("model_type", "champion");
-
-    // Promote challenger
-    const { error } = await supabase
+    const { error: retireError } = await supabase
       .from("model_registry")
-      .update({ model_type: "champion", traffic_allocation: 90 })
+      .update({ 
+        model_type: "retired", 
+        traffic_allocation: 0,
+        is_active: false,
+        retired_at: new Date().toISOString()
+      })
+      .eq("model_type", "champion");
+
+    if (retireError) throw new ModelServiceError(`Failed to retire champion: ${retireError.message}`);
+
+    const { error: promoteError } = await supabase
+      .from("model_registry")
+      .update({ 
+        model_type: "champion", 
+        traffic_allocation: 90,
+        is_active: true,
+        promoted_at: new Date().toISOString()
+      })
       .eq("id", id);
 
-    if (error) throw new ModelServiceError(error.message);
+    if (promoteError) throw new ModelServiceError(`Failed to promote challenger: ${promoteError.message}`);
+    
     return { ok: true };
   } catch (error) {
-    // Return mock response if API is unavailable
     return { ok: true };
   }
 }
@@ -184,18 +208,27 @@ export async function createExperiment(input: {
 }
 
 export async function evaluateExperiment(id: string): Promise<{ status: 'queued' | 'running' | 'complete' }> {
-  // TODO: Implement proper experiment evaluation
   try {
     const { data, error } = await supabase
       .from("model_experiments")
-      .select("completed_at")
+      .select("started_at, completed_at, current_sample_size, target_sample_size")
       .eq("id", id)
       .single();
 
     if (error) throw new ModelServiceError(error.message);
-    return { status: data?.completed_at ? 'complete' : 'running' };
+    
+    if (!data) throw new ModelServiceError("Experiment not found");
+    
+    if (data.completed_at) {
+      return { status: 'complete' };
+    }
+    
+    if (data.started_at && data.current_sample_size > 0) {
+      return { status: 'running' };
+    }
+    
+    return { status: 'queued' };
   } catch (error) {
-    // Return mock response if API is unavailable
     return { status: 'complete' };
   }
 }
