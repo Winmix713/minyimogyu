@@ -1068,4 +1068,115 @@ class MarketCorrelationService {
   }
 }
 
-export const MarketCorrelationService = new MarketCorrelationService();
+export const marketCorrelationService = new MarketCorrelationService();
+
+// Collaborative Intelligence Service - stub implementation
+class CollaborativeIntelligenceService {
+  async getCrowdWisdom(matchId: string) {
+    return {
+      success: true,
+      crowdWisdom: {
+        matchId,
+        averageConfidence: 0.72,
+        predictionDistribution: {
+          homeWin: 0.45,
+          draw: 0.20,
+          awayWin: 0.35,
+        },
+        totalPredictions: 1250,
+        consensusOpinion: 'home_win' as const,
+      },
+    };
+  }
+
+  async analyzeDivergence(matchId: string) {
+    return {
+      success: true,
+      analysis: {
+        matchId,
+        divergenceScore: 0.35,
+        confidenceVariance: 0.18,
+        consensusStrength: 0.65,
+      },
+    };
+  }
+}
+
+export const collaborativeIntelligenceService = new CollaborativeIntelligenceService();
+export { CollaborativeIntelligenceService };
+
+// Market Integration Service - stub implementation
+class MarketIntegrationService {
+  async getMarketOdds(matchId: string) {
+    return {
+      success: true,
+      odds: {
+        matchId,
+        homeWin: 1.95,
+        draw: 3.5,
+        awayWin: 3.8,
+      },
+    };
+  }
+
+  async getValueBets(matchId: string) {
+    return {
+      success: true,
+      valueBets: [],
+    };
+  }
+}
+
+export const marketIntegrationService = new MarketIntegrationService();
+export { MarketIntegrationService };
+
+// Temporal Decay Service - stub implementation
+class TemporalDecayService {
+  async getInformationFreshness(tableName: string, recordId: string) {
+    return {
+      success: true,
+      freshness: {
+        recordId,
+        freshness: 0.85,
+        decayRate: 0.01,
+      },
+    };
+  }
+
+  async getTemporalDecay(data: any[]) {
+    return {
+      success: true,
+      adjustedData: data,
+    };
+  }
+}
+
+export const temporalDecayService = new TemporalDecayService();
+export { TemporalDecayService };
+
+// Self-Improving System Service - stub implementation
+class SelfImprovingSystemService {
+  async getExperiments() {
+    return {
+      success: true,
+      experiments: [],
+    };
+  }
+
+  async runExperiment(config: any) {
+    return {
+      success: true,
+      experimentId: `exp-${Date.now()}`,
+    };
+  }
+
+  async getExperimentResults(experimentId: string) {
+    return {
+      success: true,
+      results: {},
+    };
+  }
+}
+
+export const selfImprovingSystemService = new SelfImprovingSystemService();
+export { SelfImprovingSystemService };
