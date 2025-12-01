@@ -1,78 +1,102 @@
-import { mockJobs, type MockJob } from "@/mocks/mockJobs";
+import { httpClient, unwrapResponse } from './api';
+import { JobSummary } from '@/types/jobs';
+import { mockJobs } from './mockData';
 
-// Simulate API delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-export interface JobFormData {
-  name: string;
-  type: MockJob["type"];
-  schedule: string;
-  description?: string;
-}
+// In-memory mock storage
+let jobsData = [...mockJobs];
 
 export const jobsService = {
-  async getJobs(): Promise<MockJob[]> {
-    await delay(500);
-    return [...mockJobs];
+  getJobs: async (): Promise<JobSummary[]> => {
+    const response = await httpClient.get<JobSummary[]>('/jobs', jobsData);
+    return unwrapResponse(response);
   },
 
-  async getJobById(id: string): Promise<MockJob | null> {
-    await delay(300);
-    return mockJobs.find((job) => job.id === id) || null;
+  getJobById: async (id: string): Promise<JobSummary> => {
+    const job = jobsData.find(j => j.id === id);
+    
+    if (!job) {
+      throw new Error(`Job with id ${id} not found`);
+    }
+
+    const response = await httpClient.get<JobSummary>(`/jobs/${id}`, job);
+    return unwrapResponse(response);
   },
 
-  async createJob(data: JobFormData): Promise<MockJob> {
-    await delay(1000);
-    const newJob: MockJob = {
+  createJob: async (data: Partial<JobSummary>): Promise<JobSummary> => {
+    const newJob: JobSummary = {
       id: `job-${Date.now()}`,
-      ...data,
-      status: "pending",
-      createdAt: new Date().toISOString(),
-      progress: 0,
+      job_name: data.job_name || 'new-job',
+      job_type: data.job_type || 'data_import',
+      cron_schedule: data.cron_schedule || '0 0 * * *',
+      enabled: data.enabled ?? true,
+      last_run_at: null,
+      next_run_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      config: data.config || {},
+      is_due: false,
+      average_duration_ms: null,
+      stats: {
+        total_runs: 0,
+        success_runs: 0,
+      },
+      last_log: null,
     };
-    mockJobs.push(newJob);
-    return newJob;
+
+    jobsData.push(newJob);
+
+    const response = await httpClient.post<JobSummary>('/jobs', data, newJob);
+    return unwrapResponse(response);
   },
 
-  async updateJob(id: string, data: Partial<JobFormData>): Promise<MockJob | null> {
-    await delay(800);
-    const job = mockJobs.find((j) => j.id === id);
-    if (!job) return null;
+  updateJob: async (id: string, data: Partial<JobSummary>): Promise<JobSummary> => {
+    const index = jobsData.findIndex(j => j.id === id);
     
-    Object.assign(job, data, { lastUpdated: new Date().toISOString() });
-    return job;
+    if (index === -1) {
+      throw new Error(`Job with id ${id} not found`);
+    }
+
+    jobsData[index] = {
+      ...jobsData[index],
+      ...data,
+    };
+
+    const response = await httpClient.put<JobSummary>(`/jobs/${id}`, data, jobsData[index]);
+    return unwrapResponse(response);
   },
 
-  async deleteJob(id: string): Promise<boolean> {
-    await delay(500);
-    const index = mockJobs.findIndex((j) => j.id === id);
-    if (index === -1) return false;
+  deleteJob: async (id: string): Promise<void> => {
+    const index = jobsData.findIndex(j => j.id === id);
     
-    mockJobs.splice(index, 1);
-    return true;
+    if (index === -1) {
+      throw new Error(`Job with id ${id} not found`);
+    }
+
+    jobsData.splice(index, 1);
+
+    await httpClient.delete<void>(`/jobs/${id}`, undefined);
   },
 
-  async toggleJob(id: string): Promise<MockJob | null> {
-    await delay(300);
-    const job = mockJobs.find((j) => j.id === id);
-    if (!job) return null;
+  toggleJob: async (id: string): Promise<JobSummary> => {
+    const index = jobsData.findIndex(j => j.id === id);
     
-    job.status = job.status === "running" ? "pending" : "running";
-    return job;
+    if (index === -1) {
+      throw new Error(`Job with id ${id} not found`);
+    }
+
+    jobsData[index].enabled = !jobsData[index].enabled;
+
+    const response = await httpClient.patch<JobSummary>(`/jobs/${id}/toggle`, {}, jobsData[index]);
+    return unwrapResponse(response);
   },
 
-  async getJobLogs(id: string): Promise<string[]> {
-    await delay(400);
-    const mockLogs = [
-      `[2024-01-15 10:30:00] Starting job ${id}`,
-      `[2024-01-15 10:30:05] Initializing data pipeline`,
-      `[2024-01-15 10:30:15] Loading training data`,
-      `[2024-01-15 10:30:45] Data loaded successfully (5000 samples)`,
-      `[2024-01-15 10:31:00] Starting training process`,
-      `[2024-01-15 10:35:30] Training complete`,
-      `[2024-01-15 10:35:40] Evaluating model performance`,
-      `[2024-01-15 10:36:00] Job completed successfully`,
-    ];
-    return mockLogs;
+  triggerJob: async (id: string): Promise<JobSummary> => {
+    const job = jobsData.find(j => j.id === id);
+    
+    if (!job) {
+      throw new Error(`Job with id ${id} not found`);
+    }
+
+    // Simulate job execution
+    const response = await httpClient.post<JobSummary>(`/jobs/${id}/trigger`, {}, job);
+    return unwrapResponse(response);
   },
 };

@@ -1,96 +1,48 @@
-import { mockChartData, type ChartData, type StatData } from "@/mocks/mockChartData";
-import { mockPredictions } from "@/mocks/mockPredictions";
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-export interface AnalyticsDateRange {
-  startDate: string;
-  endDate: string;
-}
+import { httpClient, unwrapResponse } from './api';
+import { AnalyticsData, AnalyticsMetric, ChartData, TimeRange } from '@/types/analytics';
+import { mockAnalyticsMetrics, mockChartData } from './mockData';
 
 export const analyticsService = {
-  async getDailyStats(): Promise<StatData[]> {
-    await delay(400);
-    return mockChartData.dailyStats;
+  getAnalytics: async (timeRange: TimeRange = 'month'): Promise<AnalyticsData> => {
+    const data: AnalyticsData = {
+      metrics: mockAnalyticsMetrics,
+      charts: mockChartData,
+      timeRange,
+      generatedAt: new Date().toISOString(),
+    };
+
+    const response = await httpClient.get<AnalyticsData>(`/analytics?timeRange=${timeRange}`, data);
+    return unwrapResponse(response);
   },
 
-  async getWeeklyStats(): Promise<StatData[]> {
-    await delay(400);
-    return mockChartData.weeklyStats;
+  getChartData: async (chartType: string): Promise<ChartData> => {
+    const chart = mockChartData.find(c => c.type === chartType) || mockChartData[0];
+
+    const response = await httpClient.get<ChartData>(`/analytics/charts/${chartType}`, chart);
+    return unwrapResponse(response);
   },
 
-  async getMonthlyStats(): Promise<StatData[]> {
-    await delay(400);
-    return mockChartData.monthlyStats;
+  getMetrics: async (): Promise<AnalyticsMetric[]> => {
+    const response = await httpClient.get<AnalyticsMetric[]>('/analytics/metrics', mockAnalyticsMetrics);
+    return unwrapResponse(response);
   },
 
-  async getAccuracyChart(): Promise<ChartData> {
-    await delay(300);
-    return mockChartData.accuracyOverTime;
-  },
-
-  async getPredictionDistribution(): Promise<ChartData> {
-    await delay(300);
-    return mockChartData.predictionDistribution;
-  },
-
-  async getPerformanceByLeague(): Promise<ChartData> {
-    await delay(300);
-    return mockChartData.performanceByLeague;
-  },
-
-  async getTrafficAllocation(): Promise<ChartData> {
-    await delay(300);
-    return mockChartData.trafficAllocation;
-  },
-
-  async getConfusionMatrix(): Promise<ChartData> {
-    await delay(300);
-    return mockChartData.confusionMatrix;
-  },
-
-  async getPredictionAnalytics(dateRange?: AnalyticsDateRange) {
-    await delay(600);
+  getMetricById: async (metricId: string): Promise<AnalyticsMetric> => {
+    const metric = mockAnalyticsMetrics.find(m => m.id === metricId);
     
-    const totalPredictions = mockPredictions.length;
-    const correctPredictions = mockPredictions.filter((p) => p.outcome === "correct").length;
-    const incorrectPredictions = mockPredictions.filter((p) => p.outcome === "incorrect").length;
-    const pendingPredictions = mockPredictions.filter((p) => p.outcome === "pending").length;
+    if (!metric) {
+      throw new Error(`Metric with id ${metricId} not found`);
+    }
 
-    return {
-      totalPredictions,
-      correctPredictions,
-      incorrectPredictions,
-      pendingPredictions,
-      accuracy: totalPredictions > 0 
-        ? ((correctPredictions + pendingPredictions / 2) / totalPredictions * 100).toFixed(2)
-        : 0,
-      averageConfidence: (
-        mockPredictions.reduce((sum, p) => sum + p.confidence, 0) / 
-        mockPredictions.length
-      ).toFixed(2),
-      predictions: mockPredictions,
-    };
+    const response = await httpClient.get<AnalyticsMetric>(`/analytics/metrics/${metricId}`, metric);
+    return unwrapResponse(response);
   },
 
-  async getSystemHealth() {
-    await delay(300);
-    return {
-      cpuUsage: Math.random() * 45 + 20,
-      memoryUsage: Math.random() * 50 + 30,
-      diskUsage: Math.random() * 60 + 15,
-      uptime: "45 days",
-      lastUpdate: new Date().toISOString(),
-      status: "healthy",
-    };
-  },
-
-  async getPerformanceTrends() {
-    await delay(400);
-    return {
-      week: [72, 73, 75, 74, 76, 75, 76],
-      month: [68, 70, 71, 72, 73, 74, 75, 76],
-      quarter: [62, 65, 68, 70, 72, 73, 74, 75, 76],
-    };
+  exportAnalytics: async (timeRange: TimeRange = 'month'): Promise<Blob> => {
+    const data = await analyticsService.getAnalytics(timeRange);
+    
+    // Simulate CSV export
+    const csv = JSON.stringify(data, null, 2);
+    return new Blob([csv], { type: 'application/json' });
   },
 };

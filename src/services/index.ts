@@ -1,6 +1,10 @@
-export { jobsService } from "./jobsService";
-export { modelsService } from "./modelsService";
-export { analyticsService } from "./analyticsService";
-export { userService } from "./userService";
-export { alertsService } from "./alertsService";
-export { CollaborativeIntelligenceService } from "./collaborativeIntelligenceService";
+// Export all services
+export * from './api';
+export * from './authService';
+export * from './jobsService';
+export * from './modelsService';
+export * from './predictionsService';
+export * from './analyticsService';
+export * from './usersService';
+export * from './notificationsService';
+export * from './mockData';
