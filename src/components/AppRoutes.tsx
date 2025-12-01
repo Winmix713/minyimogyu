@@ -1,11 +1,12 @@
 import React, { Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { usePhaseFlags } from '@/hooks/usePhaseFlags';
-import { useRequireAuth, useRequireRole } from '@/hooks/useAuth';
-import AuthGate from '@/components/AuthGate';
-import RoleGate from '@/components/admin/RoleGate';
 import PageLoading from '@/components/ui/PageLoading';
-import AppLayout from '@/components/layout/AppLayout';
+import PublicLayout from '@/components/layouts/PublicLayout';
+import DashboardLayout from '@/components/layouts/DashboardLayout';
+import AdminLayout from '@/components/layouts/AdminLayout';
+import PrivateRoute from '@/components/routes/PrivateRoute';
+import AdminRoute from '@/components/routes/AdminRoute';
 
 // Public pages
 import Index from '@/pages/Index';
@@ -26,8 +27,9 @@ import FeatureFlagsDemo from '@/pages/FeatureFlagsDemo';
 import Dashboard from '@/pages/Dashboard';
 import NewPredictions from '@/pages/NewPredictions';
 import Phase9 from '@/pages/Phase9';
+import Settings from '@/pages/Settings';
 
-// Lazy load heavy components
+// Lazy loaded feature pages
 const CrossLeague = React.lazy(() => import('@/pages/CrossLeague'));
 const Analytics = React.lazy(() => import('@/pages/Analytics'));
 const EnvVariables = React.lazy(() => import('@/pages/EnvVariables'));
@@ -36,7 +38,7 @@ const ModelsPage = React.lazy(() => import('@/pages/ModelsPage'));
 const MonitoringPage = React.lazy(() => import('@/pages/MonitoringPage'));
 const PredictionAnalyzerPage = React.lazy(() => import('@/pages/PredictionAnalyzerPage'));
 
-// Lazy load admin components
+// Lazy loaded admin pages
 const AdminDashboard = React.lazy(() => import('@/pages/admin/AdminDashboard'));
 const UsersPage = React.lazy(() => import('@/pages/admin/users/UsersPage'));
 const RunningJobsPage = React.lazy(() => import('@/pages/admin/jobs/RunningJobsPage'));
@@ -48,306 +50,267 @@ const ModelStatusDashboard = React.lazy(() => import('@/pages/admin/ModelStatusD
 const FeedbackInboxPage = React.lazy(() => import('@/pages/admin/FeedbackInboxPage'));
 const PredictionReviewPage = React.lazy(() => import('@/pages/admin/PredictionReviewPage'));
 
-// WinmixPro prototype surfaces
+// WinmixPro prototype
 const WinmixProLayout = React.lazy(() => import('@/winmixpro/WinmixProLayout'));
-
-// Route wrapper for protected routes with layout
-const ProtectedRoute: React.FC<{
-  children: React.ReactNode;
-  requiredRoles?: string[];
-  showSidebar?: boolean;
-}> = ({ children, requiredRoles, showSidebar = true }) => {
-  const { loading: authLoading, authenticated } = useRequireAuth();
-  const { loading: roleLoading, authorized } = useRequireRole(requiredRoles || []);
-  
-  if (authLoading || roleLoading) {
-    return <PageLoading message="Checking permissions..." />;
-  }
-  
-  if (!authenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  if (requiredRoles && requiredRoles.length > 0 && !authorized) {
-    return <Navigate to="/unauthorized" replace />;
-  }
-  
-  return (
-    <AppLayout showSidebar={showSidebar}>
-      {children}
-    </AppLayout>
-  );
-};
-
-// Route wrapper for public routes
-const PublicRoute: React.FC<{
-  children: React.ReactNode;
-  showSidebar?: boolean;
-}> = ({ children, showSidebar = false }) => {
-  return (
-    <AppLayout showSidebar={showSidebar}>
-      {children}
-    </AppLayout>
-  );
-};
 
 const AppRoutes: React.FC = () => {
   const { isPhase5Enabled, isPhase6Enabled, isPhase7Enabled, isPhase8Enabled, isPhase9Enabled } = usePhaseFlags();
 
   return (
     <Routes>
-      {/* Public routes - no auth required */}
-      <Route path="/" element={<PublicRoute><Index /></PublicRoute>} />
-      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-      <Route path="/unauthorized" element={<PublicRoute><Unauthorized /></PublicRoute>} />
-      <Route path="/feature-flags" element={<PublicRoute><FeatureFlagsDemo /></PublicRoute>} />
-
-      {/* Demo routes - accessible to all (read-only for unauthenticated) */}
-      <Route path="/predictions" element={<PublicRoute showSidebar><PredictionsView /></PublicRoute>} />
-      <Route path="/matches" element={
-        <PublicRoute showSidebar>
-          <Suspense fallback={<PageLoading message="Loading matches..." />}>
-            <MatchesPage />
-          </Suspense>
-        </PublicRoute>
-      } />
-      <Route path="/match/:id" element={
-        <PublicRoute showSidebar>
-          <Suspense fallback={<PageLoading message="Loading match details..." />}>
-            <MatchDetail />
-          </Suspense>
-        </PublicRoute>
-      } />
-      <Route path="/teams" element={<PublicRoute showSidebar><Teams /></PublicRoute>} />
-      <Route path="/teams/:teamName" element={
-        <PublicRoute showSidebar>
-          <Suspense fallback={<PageLoading message="Loading team details..." />}>
-            <TeamDetail />
-          </Suspense>
-        </PublicRoute>
-      } />
-      <Route path="/leagues" element={<PublicRoute showSidebar><Leagues /></PublicRoute>} />
-
-      {/* AI Chat - accessible to all */}
-      <Route path="/ai-chat" element={
-        <PublicRoute showSidebar>
-          <Suspense fallback={<PageLoading message="Loading AI Chat..." />}>
-            <AIChat />
-          </Suspense>
-        </PublicRoute>
-      } />
-
-      {/* Protected routes - require authentication */}
-      <Route path="/dashboard" element={
-        <ProtectedRoute>
-          <Dashboard />
-        </ProtectedRoute>
-      } />
-      <Route path="/predictions/new" element={
-        <ProtectedRoute>
-          <NewPredictions />
-        </ProtectedRoute>
-      } />
-      
-      {/* Phase 5: Advanced pattern detection */}
-      {isPhase5Enabled && (
-        <Route path="/patterns" element={
-          <ProtectedRoute>
-            <div>Phase 5 Pattern Detection</div>
-          </ProtectedRoute>
-        } />
-      )}
-      
-      {/* Phase 6: Model evaluation & feedback loop */}
-      {isPhase6Enabled && (
-        <Route path="/models" element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoading message="Loading models..." />}>
-              <ModelsPage />
+      {/* Public routes */}
+      <Route path="/" element={<PublicLayout />}>
+        <Route index element={<Index />} />
+        <Route path="login" element={<Login />} />
+        <Route path="signup" element={<Signup />} />
+        <Route path="unauthorized" element={<Unauthorized />} />
+        <Route path="feature-flags" element={<FeatureFlagsDemo />} />
+        <Route path="predictions" element={<PredictionsView />} />
+        <Route
+          path="matches"
+          element={
+            <Suspense fallback={<PageLoading message="Loading matches..." />}>
+              <MatchesPage />
             </Suspense>
-          </ProtectedRoute>
-        } />
-      )}
-      
-      {/* Phase 7: Cross-league intelligence */}
-      {isPhase7Enabled && (
-        <Route path="/crossleague" element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoading message="Loading cross-league intelligence..." />}>
-              <CrossLeague />
+          }
+        />
+        <Route
+          path="match/:id"
+          element={
+            <Suspense fallback={<PageLoading message="Loading match details..." />}>
+              <MatchDetail />
             </Suspense>
-          </ProtectedRoute>
-        } />
-      )}
-      
-      {/* Phase 8: Monitoring & visualization */}
-      {isPhase8Enabled && (
-        <>
-          <Route path="/analytics" element={
-            <ProtectedRoute>
-              <Suspense fallback={<PageLoading message="Loading analytics..." />}>
-                <Analytics />
-              </Suspense>
-            </ProtectedRoute>
-          } />
-          <Route path="/monitoring" element={
-            <ProtectedRoute>
-              <Suspense fallback={<PageLoading message="Loading monitoring..." />}>
-                <MonitoringPage />
-              </Suspense>
-            </ProtectedRoute>
-          } />
-          <Route path="/prediction-analyzer" element={
-            <ProtectedRoute>
-              <Suspense fallback={<PageLoading message="Loading prediction analyzer..." />}>
-                <PredictionAnalyzerPage />
-              </Suspense>
-            </ProtectedRoute>
-          } />
-        </>
-      )}
-      
-      {/* Phase 9: Collaborative market intelligence */}
-      {isPhase9Enabled && (
-        <Route path="/phase9" element={
-          <ProtectedRoute>
-            <Phase9 />
-          </ProtectedRoute>
-        } />
-      )}
-
-      {/* Admin routes - require admin or analyst role */}
-      <Route path="/admin" element={
-        <ProtectedRoute requiredRoles={['admin', 'analyst']}>
-          <Suspense fallback={<PageLoading message="Loading admin dashboard..." />}>
-            <AdminDashboard />
-          </Suspense>
-        </ProtectedRoute>
-      } />
-      <Route path="/admin/users" element={
-        <ProtectedRoute requiredRoles={['admin']}>
-          <Suspense fallback={<PageLoading message="Loading user management..." />}>
-            <UsersPage />
-          </Suspense>
-        </ProtectedRoute>
-      } />
-      <Route path="/admin/jobs" element={
-        <ProtectedRoute requiredRoles={['admin', 'analyst']}>
-          <Suspense fallback={<PageLoading message="Loading job management..." />}>
-            <RunningJobsPage />
-          </Suspense>
-        </ProtectedRoute>
-      } />
-      <Route path="/admin/phase9" element={
-        <ProtectedRoute requiredRoles={['admin', 'analyst']}>
-          <Suspense fallback={<PageLoading message="Loading Phase 9 settings..." />}>
-            <Phase9SettingsPage />
-          </Suspense>
-        </ProtectedRoute>
-      } />
-      <Route path="/admin/health" element={
-        <ProtectedRoute requiredRoles={['admin', 'analyst']}>
-          <Suspense fallback={<PageLoading message="Loading health dashboard..." />}>
-            <HealthDashboard />
-          </Suspense>
-        </ProtectedRoute>
-      } />
-      <Route path="/admin/stats" element={
-        <ProtectedRoute requiredRoles={['admin', 'analyst']}>
-          <Suspense fallback={<PageLoading message="Loading stats..." />}>
-            <StatsPage />
-          </Suspense>
-        </ProtectedRoute>
-      } />
-      <Route path="/admin/integrations" element={
-        <ProtectedRoute requiredRoles={['admin', 'analyst']}>
-          <Suspense fallback={<PageLoading message="Loading integrations..." />}>
-            <IntegrationsPage />
-          </Suspense>
-        </ProtectedRoute>
-      } />
-      <Route path="/admin/model-status" element={
-        <ProtectedRoute requiredRoles={['admin', 'analyst']}>
-          <Suspense fallback={<PageLoading message="Loading model status..." />}>
-            <ModelStatusDashboard />
-          </Suspense>
-        </ProtectedRoute>
-      } />
-      <Route path="/admin/feedback" element={
-        <ProtectedRoute requiredRoles={['admin', 'analyst']}>
-          <Suspense fallback={<PageLoading message="Loading feedback inbox..." />}>
-            <FeedbackInboxPage />
-          </Suspense>
-        </ProtectedRoute>
-      } />
-      <Route path="/admin/predictions" element={
-        <ProtectedRoute requiredRoles={['admin', 'analyst']}>
-          <Suspense fallback={<PageLoading message="Loading prediction review..." />}>
-            <PredictionReviewPage />
-          </Suspense>
-        </ProtectedRoute>
-      } />
-
-      {/* Legacy routes for backward compatibility */}
-      {(isPhase5Enabled || isPhase6Enabled || isPhase7Enabled || isPhase8Enabled) && (
-        <Route path="/jobs" element={
-          <ProtectedRoute requiredRoles={['admin', 'analyst']}>
-            <Suspense fallback={<PageLoading message="Loading scheduled jobs..." />}>
-              <ScheduledJobsPage />
+          }
+        />
+        <Route path="teams" element={<Teams />} />
+        <Route
+          path="teams/:teamName"
+          element={
+            <Suspense fallback={<PageLoading message="Loading team details..." />}>
+              <TeamDetail />
             </Suspense>
-          </ProtectedRoute>
-        } />
-      )}
-
-      {(isPhase6Enabled || isPhase8Enabled) && (
-        <Route path="/admin/models" element={
-          <ProtectedRoute requiredRoles={['admin', 'analyst']}>
-            <Suspense fallback={<PageLoading message="Loading models..." />}>
-              <ModelsPage />
+          }
+        />
+        <Route path="leagues" element={<Leagues />} />
+        <Route
+          path="ai-chat"
+          element={
+            <Suspense fallback={<PageLoading message="Loading AI Chat..." />}>
+              <AIChat />
             </Suspense>
-          </ProtectedRoute>
-        } />
-      )}
+          }
+        />
+        <Route
+          path="winmixpro"
+          element={
+            <Suspense fallback={<PageLoading message="Loading WinmixPro..." />}>
+              <WinmixProLayout />
+            </Suspense>
+          }
+        />
+      </Route>
 
-      {isPhase8Enabled && (
-        <>
-          <Route path="/admin/matches" element={
-            <ProtectedRoute requiredRoles={['admin', 'analyst']}>
-              <Suspense fallback={<PageLoading message="Loading matches..." />}>
-                <MatchesPage />
+      {/* Private routes with dashboard layout */}
+      <Route element={<PrivateRoute />}>
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/predictions/new" element={<NewPredictions />} />
+          {isPhase5Enabled && (
+            <Route path="/patterns" element={<div>Phase 5 Pattern Detection</div>} />
+          )}
+          {isPhase6Enabled && (
+            <Route
+              path="/models"
+              element={
+                <Suspense fallback={<PageLoading message="Loading models..." />}>
+                  <ModelsPage />
+                </Suspense>
+              }
+            />
+          )}
+          {isPhase7Enabled && (
+            <Route
+              path="/crossleague"
+              element={
+                <Suspense fallback={<PageLoading message="Loading cross-league intelligence..." />}>
+                  <CrossLeague />
+                </Suspense>
+              }
+            />
+          )}
+          {isPhase8Enabled && (
+            <>
+              <Route
+                path="/analytics"
+                element={
+                  <Suspense fallback={<PageLoading message="Loading analytics..." />}>
+                    <Analytics />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/monitoring"
+                element={
+                  <Suspense fallback={<PageLoading message="Loading monitoring..." />}>
+                    <MonitoringPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/prediction-analyzer"
+                element={
+                  <Suspense fallback={<PageLoading message="Loading prediction analyzer..." />}>
+                    <PredictionAnalyzerPage />
+                  </Suspense>
+                }
+              />
+            </>
+          )}
+          {isPhase9Enabled && (
+            <Route path="/phase9" element={<Phase9 />} />
+          )}
+          <Route path="/settings" element={<Settings />} />
+        </Route>
+      </Route>
+
+      {/* Admin routes */}
+      <Route element={<AdminRoute />}>
+        <Route element={<AdminLayout />}>
+          <Route
+            path="/admin"
+            element={
+              <Suspense fallback={<PageLoading message="Loading admin dashboard..." />}>
+                <AdminDashboard />
               </Suspense>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/monitoring" element={
-            <ProtectedRoute requiredRoles={['admin', 'analyst']}>
-              <Suspense fallback={<PageLoading message="Loading monitoring..." />}>
-                <MonitoringPage />
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <Suspense fallback={<PageLoading message="Loading user management..." />}>
+                <UsersPage />
               </Suspense>
-            </ProtectedRoute>
-          } />
-        </>
-      )}
-      
-      <Route path="/admin/environment" element={
-        <ProtectedRoute requiredRoles={['admin']}>
-          <Suspense fallback={<PageLoading message="Loading environment variables..." />}>
-            <EnvVariables />
-          </Suspense>
-        </ProtectedRoute>
-      } />
+            }
+          />
+          <Route
+            path="/admin/jobs"
+            element={
+              <Suspense fallback={<PageLoading message="Loading job management..." />}>
+                <RunningJobsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/phase9"
+            element={
+              <Suspense fallback={<PageLoading message="Loading Phase 9 settings..." />}>
+                <Phase9SettingsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/health"
+            element={
+              <Suspense fallback={<PageLoading message="Loading health dashboard..." />}>
+                <HealthDashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/stats"
+            element={
+              <Suspense fallback={<PageLoading message="Loading stats..." />}>
+                <StatsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/integrations"
+            element={
+              <Suspense fallback={<PageLoading message="Loading integrations..." />}>
+                <IntegrationsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/model-status"
+            element={
+              <Suspense fallback={<PageLoading message="Loading model status..." />}>
+                <ModelStatusDashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/feedback"
+            element={
+              <Suspense fallback={<PageLoading message="Loading feedback inbox..." />}>
+                <FeedbackInboxPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/predictions"
+            element={
+              <Suspense fallback={<PageLoading message="Loading prediction review..." />}>
+                <PredictionReviewPage />
+              </Suspense>
+            }
+          />
+          {(isPhase5Enabled || isPhase6Enabled || isPhase7Enabled || isPhase8Enabled) && (
+            <Route
+              path="/jobs"
+              element={
+                <Suspense fallback={<PageLoading message="Loading scheduled jobs..." />}>
+                  <ScheduledJobsPage />
+                </Suspense>
+              }
+            />
+          )}
+          {(isPhase6Enabled || isPhase8Enabled) && (
+            <Route
+              path="/admin/models"
+              element={
+                <Suspense fallback={<PageLoading message="Loading models..." />}>
+                  <ModelsPage />
+                </Suspense>
+              }
+            />
+          )}
+          {isPhase8Enabled && (
+            <>
+              <Route
+                path="/admin/matches"
+                element={
+                  <Suspense fallback={<PageLoading message="Loading matches..." />}>
+                    <MatchesPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/admin/monitoring"
+                element={
+                  <Suspense fallback={<PageLoading message="Loading monitoring..." />}>
+                    <MonitoringPage />
+                  </Suspense>
+                }
+              />
+            </>
+          )}
+          <Route
+            path="/admin/environment"
+            element={
+              <Suspense fallback={<PageLoading message="Loading environment variables..." />}>
+                <EnvVariables />
+              </Suspense>
+            }
+          />
+        </Route>
+      </Route>
 
-      {/* WinmixPro routes */}
-      <Route path="/winmixpro" element={
-        <PublicRoute>
-          <Suspense fallback={<PageLoading message="Loading WinmixPro..." />}>
-            <WinmixProLayout />
-          </Suspense>
-        </PublicRoute>
-      } />
-
-      {/* 404 */}
-      <Route path="*" element={<PublicRoute><NotFound /></PublicRoute>} />
+      {/* Catch-all 404 */}
+      <Route element={<PublicLayout />}>
+        <Route path="*" element={<NotFound />} />
+      </Route>
     </Routes>
   );
 };

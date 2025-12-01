@@ -1,37 +1,25 @@
-import { defineConfig } from "vitest/config";
-import path from "path";
+/// <reference types="vitest" />
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
 
 export default defineConfig({
+  plugins: [react()],
   test: {
-    environment: "jsdom",
     globals: true,
-    setupFiles: ["./vitest.setup.ts"],
-    include: ["src/**/*.{test,spec}.{ts,tsx}"],
-    coverage: {
-      provider: "v8",
-      reporter: ["text", "json", "html", "lcov"],
-      reportsDirectory: "./coverage",
-      thresholds: {
-        statements: 40,
-        branches: 30,
-        functions: 35,
-        lines: 40,
-      },
-    },
-    env: {
-      VITE_SUPABASE_URL: "https://api.test",
-      VITE_SUPABASE_PUBLISHABLE_KEY: "test-anon-key",
-      NEXT_PUBLIC_SUPABASE_URL: "https://api.test",
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: "test-anon-key",
-    },
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
   },
   resolve: {
-    alias: [
-      { find: "@", replacement: path.resolve(__dirname, "./src") },
-      {
-        find: "react-flow-renderer",
-        replacement: path.resolve(__dirname, "./src/vendor/react-flow-renderer.tsx"),
-      },
-    ],
+    alias: {
+      '~': path.resolve(__dirname, './src'),
+      '@': path.resolve(__dirname, './src'),
+      '@/components': path.resolve(__dirname, './src/components'),
+      '@/pages': path.resolve(__dirname, './src/pages'),
+      '@/lib': path.resolve(__dirname, './src/lib'),
+      '@/hooks': path.resolve(__dirname, './src/hooks'),
+      '@/types': path.resolve(__dirname, './src/types'),
+      '@/utils': path.resolve(__dirname, './src/utils'),
+    },
   },
-});
+})

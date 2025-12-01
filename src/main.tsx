@@ -1,17 +1,10 @@
-import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
-import "./index.css";
-import { FeatureFlagsProvider } from "./providers/FeatureFlagsProvider";
-import { initPerformanceMonitoring } from "@/lib/performance-monitor";
-import { initSentry } from "@/lib/sentry";
-import { initCloudflareBeacon } from "@/lib/cloudflare";
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
 
-initSentry();
-initCloudflareBeacon();
-initPerformanceMonitoring();
-
-createRoot(document.getElementById("root")!).render(
-  <FeatureFlagsProvider>
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
     <App />
-  </FeatureFlagsProvider>
-);
+  </StrictMode>,
+)
