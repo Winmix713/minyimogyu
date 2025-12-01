@@ -14,8 +14,8 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, TrendingUp, Users } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { CollaborativeIntelligenceService } from '@/lib/phase9-api';
 import type { UserPredictionForm as UserPredictionFormData, UserPredictionFormProps } from '@/types/phase9';
+import { CollaborativeIntelligenceService } from '@/services/collaborativeIntelligenceService';
 
 // Form validation schema
 const predictionSchema = z.object({
