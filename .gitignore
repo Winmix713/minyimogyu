@@ -15,9 +15,9 @@ dist-ssr
 # Environment variables
 .env
 .env.local
-.env.*.local
-docker/.env
-docker/.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Editor directories and files
 .vscode/*
@@ -29,30 +29,3 @@ docker/.env.local
 *.njsproj
 *.sln
 *.sw?
-
-# Test artifacts
-coverage
-playwright-report
-test-results
-
-# Models directory - exclude heavy binary artifacts but allow metadata
-models/*.pkl
-models/*.joblib
-models/*.h5
-models/__pycache__/
-models/*.pyc
-# Python
-venv/
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-*.egg-info/
-
-# ML Models
-models/*.pkl
-# Python artifacts
-__pycache__/
-*.py[cod]
-.pytest_cache/
