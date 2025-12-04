@@ -261,6 +261,25 @@ The project now includes unit, integration, end-to-end, and Supabase backend che
 
 Coverage summaries are printed to the console and detailed HTML/LCOV reports land in `coverage/`. Playwright reads Supabase defaults from `playwright.config.ts`; override via environment variables when targeting real backends.
 
+### Prototype Preview & Lighthouse QA
+
+For the static WinMix marketing prototype located at `docs/prototypes/winmix-static`:
+
+1. **Start the preview server** (serves content on port 5500):
+   ```bash
+   npm run prototype:preview
+   # -> http://localhost:5500
+   ```
+2. **Run Lighthouse** from another terminal window to validate performance and accessibility:
+   ```bash
+   npx lighthouse http://localhost:5500 --view
+   ```
+3. **Target metrics** (per design prompt):
+   - LCP < **2.5s**
+   - INP < **200ms**
+   - CLS < **0.1**
+4. **QA documentation**: Review `docs/prototypes/winmix-static/QA_REPORT.md` for the latest responsive findings, Lighthouse scores, and remediation notes.
+
 ---
 
 ## 🛠️ Environment Setup

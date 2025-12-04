@@ -13,6 +13,7 @@
     "prepreview": "npm run copy:model-registry",
     "lint": "eslint .",
     "preview": "vite preview",
+    "prototype:preview": "node scripts/dev/serve-static-prototype.mjs",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
