@@ -1,319 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hu">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WinMix - AI-Powered Football Predictions</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <script src="mock-data.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="WinMix - AI-powered football prediction platform">
+  <title>WinMix - Professional Football Analytics & AI Predictions</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-dark text-foreground font-inter">
-    <noscript>
-        <div class="fixed inset-0 bg-black text-white z-50 flex items-center justify-center p-4">
-            <div class="text-center max-w-md">
-                <h1 class="text-2xl font-bold mb-4">JavaScript Required</h1>
-                <p>This WinMix prototype requires JavaScript to display the full interactive experience. Please enable JavaScript in your browser settings.</p>
-            </div>
-        </div>
-    </noscript>
+<body>
+  <!-- Skip to content link for accessibility -->
+  <a href="#main-content" class="skip-to-content">Ugrás a fő tartalomra</a>
 
-    <!-- Hero Section (ArcSuite Style) -->
-    <header data-section="hero" class="relative min-h-screen w-full overflow-hidden">
-        <!-- Background with gradient mesh -->
-        <div class="absolute inset-0 bg-gradient-to-br from-emerald-900/20 via-black to-violet-900/20">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-            <div class="absolute inset-0 opacity-30">
-                <div class="absolute top-0 left-0 w-96 h-96 bg-emerald-500 rounded-full filter blur-3xl animate-pulse"></div>
-                <div class="absolute bottom-0 right-0 w-96 h-96 bg-violet-500 rounded-full filter blur-3xl animate-pulse delay-1000"></div>
-            </div>
-        </div>
+  <!-- Hero Section -->
+  <section class="hero" id="main-content">
+    <div class="hero-content">
+      <h1 class="text-gradient-emerald">AI-Powered Football Predictions</h1>
+      <p>Leverage advanced machine learning models trained on years of global football data to generate real-time predictions with confidence intervals you can trust.</p>
+      <div class="hero-buttons">
+        <button class="btn-cta" aria-label="Create predictions now">
+          Create Predictions Now
+          <span class="btn-cta-shine"></span>
+        </button>
+        <button class="btn-secondary" aria-label="Learn more about WinMix">Learn More</button>
+      </div>
+    </div>
+  </section>
 
-        <!-- Content -->
-        <div class="relative z-10 h-screen flex items-center px-4 sm:px-6 lg:px-8">
-            <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full">
-                <!-- Left Column - Content -->
-                <div class="text-center lg:text-left space-y-6 animate-fade-in">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-sm">
-                        <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                        <span class="text-xs font-medium text-emerald-400 uppercase tracking-wider">AI-Powered Platform</span>
-                    </div>
-                    
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
-                        <span class="text-gradient-emerald">AI-Powered Football</span><br>
-                        <span class="text-gradient-violet">Predictions</span>
-                    </h1>
-                    
-                    <h2 class="text-xl sm:text-2xl text-muted-foreground font-medium">
-                        Competitive Advantage Through Intelligence
-                    </h2>
-                    
-                    <p class="text-base sm:text-lg text-foreground/80 max-w-2xl leading-relaxed">
-                        WinMix combines advanced pattern recognition with real-time market data to deliver predictions with unmatched accuracy. Transform your football analysis with cutting-edge AI technology.
-                    </p>
-                    
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                        <button class="animated-cta group relative overflow-hidden inline-flex items-center gap-2 h-12 px-8 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border border-emerald-500 font-semibold hover:scale-105 transition-all duration-300 shadow-glow-emerald hover:shadow-glow-emerald">
-                            <span class="absolute inset-0 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 bg-gradient-to-r from-white/0 via-white/40 to-white/0 pointer-events-none"></span>
-                            <span class="relative z-10 inline-flex items-center gap-2">
-                                Create Predictions Now
-                                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                                </svg>
-                            </span>
-                        </button>
-                        
-                        <button class="h-12 px-8 rounded-lg border border-gray-600 text-gray-300 font-semibold hover:border-emerald-500 hover:text-emerald-400 transition-all duration-300">
-                            Explore Data
-                        </button>
-                    </div>
-                    
-                    <div class="pt-8 border-t border-gray-700/50 flex flex-col sm:flex-row gap-6 text-sm text-gray-400 justify-center lg:justify-start">
-                        <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                            <span>500+ Predictions Generated</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                            <span>89% Average Accuracy</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                            <span>Real-time Analysis</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Right Column - Visual -->
-                <div class="relative h-96 lg:h-full min-h-96">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <div class="relative w-64 h-64 lg:w-80 lg:h-80">
-                            <!-- Animated neural network visualization -->
-                            <div class="absolute inset-0 bg-emerald-500/20 rounded-full filter blur-2xl animate-pulse"></div>
-                            <div class="absolute inset-4 bg-violet-500/20 rounded-full filter blur-xl animate-pulse delay-1000"></div>
-                            <div class="absolute inset-8 bg-emerald-500/10 rounded-full filter blur-lg animate-pulse delay-2000"></div>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <div class="text-6xl lg:text-8xl font-bold text-gradient-emerald animate-float">⚡</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Scroll indicator -->
-        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
-            <div class="w-6 h-10 border-2 border-emerald-500 rounded-full flex items-start justify-center p-2 opacity-70">
-                <div class="w-1 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-            </div>
-        </div>
-    </header>
+  <!-- Community Marquee Section -->
+  <section class="community-section" aria-labelledby="community-title">
+    <div class="container">
+      <div class="community-title">
+        <h2 id="community-title" class="text-gradient-violet">Trusted by Professional Tipsters</h2>
+        <p class="text-muted">Join 500+ professional tipsters and data analysts worldwide</p>
+      </div>
 
-    <!-- Community Hero Section (Scrolling Photo Marquee) -->
-    <section data-section="community" class="relative py-16 md:py-24 overflow-hidden bg-gradient-to-b from-black to-gray-900/50">
-        <div class="absolute inset-0 bg-gradient-to-b from-emerald-500/5 via-transparent to-violet-500/5 pointer-events-none"></div>
-        
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">
-                <span class="text-gradient-emerald">Trusted by</span> Professional Tipsters
-            </h2>
-            <p class="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-                Join hundreds of successful predictions made by our community
-            </p>
-            
-            <!-- Marquee container -->
-            <div class="relative overflow-hidden py-8" id="marquee-container">
-                <div class="marquee-content flex gap-6" id="marquee-content">
-                    <!-- Avatar items will be inserted here by JavaScript -->
-                </div>
-            </div>
+      <div class="marquee-container" data-speed="30" data-pause-on-hover="true" role="region" aria-label="Community member showcase">
+        <div class="marquee">
+          <!-- Populated by JavaScript -->
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- Feature Showcase Grid (3×2×1) -->
-    <section data-section="features" class="relative py-16 md:py-24 bg-gradient-to-b from-gray-900/50 to-black">
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">
-                    <span class="text-gradient-violet">Powerful Features</span> for Smart Analysis
-                </h2>
-                <p class="text-muted-foreground max-w-2xl mx-auto">
-                    Everything you need to make informed football predictions with confidence
-                </p>
-            </div>
-            
-            <!-- Feature Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12" id="feature-grid">
-                <!-- Feature cards will be inserted here by JavaScript -->
-            </div>
-            
-            <!-- Integrated CTA Section -->
-            <div class="glass-card p-8 rounded-xl bg-gradient-to-r from-emerald-500/10 to-violet-500/10 border border-emerald-500/30">
-                <div class="text-center">
-                    <h3 class="text-2xl font-bold mb-4 text-gradient-emerald">Ready to Transform Your Analysis?</h3>
-                    <p class="text-muted-foreground mb-6">Join thousands of tipsters already using WinMix</p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button class="animated-cta group relative overflow-hidden inline-flex items-center gap-2 h-12 px-8 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border border-emerald-500 font-semibold hover:scale-105 transition-all duration-300 shadow-glow-emerald">
-                            <span class="absolute inset-0 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 bg-gradient-to-r from-white/0 via-white/40 to-white/0 pointer-events-none"></span>
-                            <span class="relative z-10">View All Features</span>
-                        </button>
-                        <button class="h-12 px-8 rounded-lg border border-violet-500 text-violet-400 font-semibold hover:bg-violet-500/10 transition-all duration-300">
-                            Start Free Trial
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+  <!-- Feature Grid Section -->
+  <section class="features-section" aria-labelledby="features-title">
+    <div class="container">
+      <div class="features-title">
+        <h2 id="features-title" class="text-gradient-emerald">Powerful Features</h2>
+        <p class="text-muted">Everything you need to dominate in football analytics</p>
+      </div>
 
-    <!-- Integrations Showcase (3×3 Grid) -->
-    <section data-section="integrations" class="relative py-16 md:py-24 bg-gradient-to-b from-black to-gray-900/50">
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">
-                    <span class="text-gradient-emerald">Integrations</span> & Ecosystem
-                </h2>
-                <p class="text-muted-foreground max-w-2xl mx-auto">
-                    Seamlessly connect to your favorite tools and data sources
-                </p>
-            </div>
-            
-            <!-- Integration Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 max-w-4xl mx-auto" id="integration-grid">
-                <!-- Integration items will be inserted here by JavaScript -->
-            </div>
-        </div>
-    </section>
+      <div class="features-grid" data-threshold="0.1" data-stagger-delay="100" role="region" aria-label="Feature showcase">
+        <!-- Populated by JavaScript -->
+      </div>
 
-    <!-- Testimonial Carousel (Quote Reveal) -->
-    <section data-section="testimonials" class="relative py-16 md:py-24 min-h-screen flex items-center bg-gradient-to-b from-gray-900/50 to-black">
-        <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-violet-500/5"></div>
-        
-        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">
-                    What <span class="text-gradient-violet">Our Users</span> Say
-                </h2>
-            </div>
-            
-            <!-- Testimonial Carousel -->
-            <div class="relative">
-                <div class="glass-card p-8 md:p-12 rounded-xl shadow-glow-emerald" id="testimonial-card">
-                    <div class="text-center space-y-6">
-                        <!-- Quote marks -->
-                        <div class="text-6xl text-emerald-500/20 font-serif absolute top-4 left-4">"</div>
-                        
-                        <!-- Quote text -->
-                        <blockquote class="text-xl md:text-2xl font-medium italic text-gradient-emerald relative z-10" id="testimonial-quote">
-                            Loading testimonial...
-                        </blockquote>
-                        
-                        <!-- Author info -->
-                        <div class="pt-6 border-t border-gray-700/50">
-                            <div class="font-semibold text-foreground" id="testimonial-author">Author Name</div>
-                            <div class="text-muted-foreground" id="testimonial-role">Role, Location</div>
-                            
-                            <!-- Star rating -->
-                            <div class="flex justify-center gap-1 mt-4" id="testimonial-rating">
-                                <!-- Stars will be inserted here -->
-                            </div>
-                            
-                            <!-- Metric highlight -->
-                            <div class="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30" id="testimonial-metric">
-                                <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                                <span class="text-sm font-medium text-emerald-400">Metric</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Navigation -->
-                <div class="flex justify-center gap-2 mt-8" id="testimonial-dots">
-                    <!-- Dots will be inserted here -->
-                </div>
-                
-                <!-- Arrow navigation -->
-                <button class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/30 transition-colors" id="prev-testimonial">
-                    <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                </button>
-                <button class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/30 transition-colors" id="next-testimonial">
-                    <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </section>
+      <!-- CTA will be inserted here by JavaScript -->
+    </div>
+  </section>
 
-    <!-- Final CTA + Footer -->
-    <footer data-section="footer" class="relative py-16 md:py-24 bg-gradient-to-b from-black to-gray-900 border-t border-gray-800">
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Final CTA -->
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">
-                    <span class="text-gradient-emerald">Ready to Get Started?</span>
-                </h2>
-                <p class="text-muted-foreground mb-8 max-w-2xl mx-auto">
-                    Join thousands of tipsters who have already transformed their football analysis with WinMix
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button class="animated-cta group relative overflow-hidden inline-flex items-center gap-2 h-14 px-10 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border border-emerald-500 font-semibold hover:scale-105 transition-all duration-300 shadow-glow-emerald text-lg">
-                        <span class="absolute inset-0 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 bg-gradient-to-r from-white/0 via-white/40 to-white/0 pointer-events-none"></span>
-                        <span class="relative z-10">Start Free Trial</span>
-                    </button>
-                    <button class="h-14 px-10 rounded-lg border border-gray-600 text-gray-300 font-semibold hover:border-emerald-500 hover:text-emerald-400 transition-all duration-300 text-lg">
-                        Schedule Demo
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Footer content -->
-            <div class="border-t border-gray-800 pt-8">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                    <div>
-                        <h3 class="font-bold text-lg mb-4 text-gradient-emerald">WinMix</h3>
-                        <p class="text-muted-foreground text-sm">
-                            AI-powered football predictions platform for professional tipsters and enthusiasts.
-                        </p>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold mb-4">Product</h4>
-                        <ul class="space-y-2 text-sm text-muted-foreground">
-                            <li><a href="#" class="hover:text-emerald-400 transition-colors">Features</a></li>
-                            <li><a href="#" class="hover:text-emerald-400 transition-colors">Pricing</a></li>
-                            <li><a href="#" class="hover:text-emerald-400 transition-colors">API</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold mb-4">Resources</h4>
-                        <ul class="space-y-2 text-sm text-muted-foreground">
-                            <li><a href="#" class="hover:text-emerald-400 transition-colors">Documentation</a></li>
-                            <li><a href="#" class="hover:text-emerald-400 transition-colors">Blog</a></li>
-                            <li><a href="#" class="hover:text-emerald-400 transition-colors">Support</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold mb-4">Company</h4>
-                        <ul class="space-y-2 text-sm text-muted-foreground">
-                            <li><a href="#" class="hover:text-emerald-400 transition-colors">About</a></li>
-                            <li><a href="#" class="hover:text-emerald-400 transition-colors">Privacy</a></li>
-                            <li><a href="#" class="hover:text-emerald-400 transition-colors">Terms</a></li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="border-t border-gray-800 pt-8 text-center text-sm text-muted-foreground">
-                    <p>&copy; 2024 WinMix TipsterHub. All rights reserved.</p>
-                </div>
-            </div>
-        </div>
-    </footer>
+  <!-- Integrations Section -->
+  <section class="integrations-section" aria-labelledby="integrations-title">
+    <div class="container">
+      <div style="text-align: center; margin-bottom: 3rem;">
+        <h2 id="integrations-title" class="text-gradient-violet">Integration Partners</h2>
+        <p class="text-muted">Connect with industry-leading data providers and betting platforms</p>
+      </div>
 
-    <script src="script.js"></script>
+      <div class="integrations-grid" role="region" aria-label="Integration partners">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Carousel Section -->
+  <section class="testimonials-section" aria-labelledby="testimonials-title">
+    <div class="container">
+      <div class="testimonials-title">
+        <h2 id="testimonials-title" class="text-gradient-emerald">Success Stories</h2>
+        <p class="text-muted">Real results from real users</p>
+      </div>
+
+      <div class="carousel" 
+           data-auto-advance="true" 
+           data-interval="8000" 
+           data-enable-keyboard="true"
+           role="region" 
+           aria-label="Testimonial carousel"
+           aria-roledescription="Carousel">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2024 WinMix. Összes jog fenntartva. | <a href="#" style="color: var(--color-primary); text-decoration: none;">Adatvédelmi szabályzat</a> | <a href="#" style="color: var(--color-primary); text-decoration: none;">Felhasználási feltételek</a></p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="mock-data.js"></script>
+  <script src="prototype.js"></script>
 </body>
 </html>
