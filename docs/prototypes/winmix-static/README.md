@@ -1,383 +1,415 @@
-# WinMix Static Prototype
+# WinMix Static Prototype - Interaktivitási Réteg
 
-A comprehensive static HTML prototype of the WinMix AI-powered football predictions landing page, built with Tailwind CSS and vanilla JavaScript.
+Az interaktív WinMix prototípus egy teljes körű, JavaScript alapú implementáció, amely a design specifikáció összes interaktív komponensét valósítja meg. Statikus HTML-ből indul, de szuperítatív JavaScript modulokkal bővül az animációkhoz és az interaktivitáshoz.
 
-## 🚀 Quick Start
+## 📋 Tartalom
 
-### Opening the Prototype
+- `index.html` - Statikus HTML struktúra (JS nélkül is működik)
+- `styles.css` - Komprehenzív stilusok és animációk
+- `prototype.js` - Interaktivitási réteg (fő modul)
+- `mock-data.js` - Mock adatok (avatárok, feature-k, testimonial-ok, integrációk)
 
-Simply open the `index.html` file in your web browser:
-
-```bash
-# Option 1: Using the dedicated preview server (recommended)
-npm run prototype:preview
-# Then visit: http://localhost:5500
-
-# Option 2: Using a local server
-python3 -m http.server 5500
-# Then visit: http://localhost:5500
-
-# Option 3: Using Node.js serve
-npx serve . -l 5500
-# Then visit: http://localhost:5500
-
-# Option 4: Direct file opening (limited functionality)
-open index.html
-```
-
-**Note**: This is a static prototype that serves as a precursor to the full Vite implementation. All functionality is self-contained and requires no build process. For best results, use the dedicated preview server on port 5500.
-
-## 📁 Project Structure
-
-```
-winmix-static/
-├── index.html              # Main landing page with all sections
-├── styles.css              # Custom CSS, animations, and Tailwind utilities
-├── script.js               # JavaScript for interactions and dynamic content
-├── mock-data.js            # Sample data for all components
-├── assets/                 # Static assets (images, logos)
-│   ├── avatars/           # Community member avatars
-│   ├── integrations/      # Integration partner logos
-│   └── hero-bg.jpg        # Hero background image
-└── README.md              # This documentation file
-```
-
-## 🎨 Design Components
-
-### 1. ArcSuite-Style Hero Section
-- Full viewport height with animated gradient background
-- Dual-column layout (desktop) / stacked (mobile)
-- Animated CTA button with shimmer effect
-- Parallax scrolling effects
-- Trust metrics display
-
-### 2. Community Hero (Scrolling Photo Marquee)
-- Continuous horizontal scrolling avatar carousel
-- 6-8 avatars visible on desktop
-- Pause on hover functionality
-- Gradient avatar fallbacks with initials
-- Smooth infinite loop animation
-
-### 3. Feature Showcase Grid (3×2×1 Responsive)
-- 3-column desktop, 2-column tablet, 1-column mobile
-- Glass morphism card design
-- Staggered fade-in animations
-- Hover effects with elevation
-- Integrated CTA section below grid
-
-### 4. Integrations Showcase (3×3 Grid)
-- 3×3 grid layout (responsive)
-- Status indicators (active/available/error)
-- Grayscale to color on hover
-- 360° rotation animation
-- Staggered load animation
-
-### 5. Testimonial Carousel (Quote Reveal)
-- Sequential content reveal animations
-- Auto-advance every 8 seconds
-- Keyboard navigation support
-- Touch/swipe navigation (mobile)
-- Star ratings and metric highlights
-
-### 6. Footer with Final CTA
-- Gradient CTA section
-- Multi-column footer layout
-- Responsive design
-- Smooth scroll navigation
-
-## 🎯 Key Features
-
-### Animations & Interactions
-- **Shimmer effect** on CTA buttons
-- **Parallax scrolling** in hero section
-- **Staggered animations** for cards and grids
-- **Hover states** with scale and rotation effects
-- **Smooth transitions** throughout (300ms base timing)
-- **Reduced motion support** for accessibility
-
-### Responsive Design
-- **Mobile-first** approach (320px breakpoint)
-- **Tablet** optimization (768px breakpoint)
-- **Desktop** enhancements (1024px+ breakpoint)
-- **Touch-friendly** interactions (48px minimum tap targets)
-- **Fluid typography** scaling
-
-### Accessibility Features
-- **Semantic HTML5** structure
-- **ARIA labels** on interactive elements
-- **Keyboard navigation** support
-- **Focus management** with visible indicators
-- **Screen reader** compatibility
-- **WCAG 2.1 AA** color contrast (7:1 minimum)
-- **Reduced motion** preference support
-
-### Performance Optimizations
-- **GPU acceleration** for animations (`will-change: transform`)
-- **Lazy loading** for images
-- **Debounced scroll handlers**
-- **Optimized animations** (60fps target)
-- **Minimal JavaScript** footprint
-- **CSS-based animations** where possible
-
-## 🎨 Design System
-
-### Colors
-- **Primary**: Emerald (#10b981)
-- **Secondary**: Violet (#a855f7)
-- **Background**: Dark (#050505)
-- **Foreground**: Light gray (#f1f5f9)
-- **Muted**: Medium gray (#3f3f46)
-
-### Typography
-- **Font Family**: Inter (Google Fonts)
-- **Weights**: 100-900 (full range)
-- **Scales**: Responsive (mobile → desktop)
-- **Gradients**: Emerald-to-violet text effects
-
-### Animations
-- **Fast**: 150ms
-- **Base**: 200ms (cubic-bezier easing)
-- **Slow**: 300ms
-- **Keyframes**: fade-in, slide-in, pop-in, spin, shimmer, float
-
-## 📊 Data Structure
-
-### Avatar Data
-```javascript
-{
-  id: 'avatar-1',
-  src: 'assets/avatars/avatar-1.jpg',
-  alt: 'Description for screen readers',
-  initials: 'MC',
-  badge: 'Top Predictor',
-  gradient: 'from-emerald-400 to-emerald-600'
-}
-```
-
-### Feature Data
-```javascript
-{
-  id: 'feature-1',
-  icon: '⚡',
-  title: 'AI-Powered Analysis',
-  description: 'Feature description...',
-  metrics: ['Real-time Analysis', 'AI-Powered'],
-  iconColor: 'text-emerald-500',
-  delay: 0
-}
-```
-
-### Testimonial Data
-```javascript
-{
-  id: 'testimonial-1',
-  quote: "Customer testimonial...",
-  author: 'Name',
-  role: 'Role',
-  location: 'City',
-  rating: 5,
-  metric: '89% Prediction Accuracy'
-}
-```
-
-### Integration Data
-```javascript
-{
-  id: 'integration-1',
-  name: 'Supabase',
-  logo: 'assets/integrations/supabase.svg',
-  description: 'Database platform',
-  status: 'active', // active, available, error
-  category: 'infrastructure'
-}
-```
-
-## 🛠️ Technical Implementation
-
-### Tailwind Configuration
-The prototype uses Tailwind CDN with inline configuration:
-
-```javascript
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: { /* custom color palette */ },
-      fontFamily: { /* Inter font */ },
-      boxShadow: { /* glow effects */ }
-    }
-  }
-}
-```
-
-### CSS Architecture
-- **Base styles**: Custom properties and reset
-- **Components**: Reusable UI patterns
-- **Utilities**: Tailwind utilities + custom extensions
-- **Animations**: Keyframes and animation classes
-
-### JavaScript Architecture
-- **Modular functions**: Each feature has dedicated initialization
-- **Event delegation**: Efficient event handling
-- **Performance optimized**: Debounced handlers, intersection observers
-- **Accessibility first**: Keyboard navigation, ARIA support
-
-## 📱 Browser Support
-
-### Desktop Browsers
-- Chrome 90+ ✅
-- Firefox 88+ ✅
-- Safari 14+ ✅
-- Edge 90+ ✅
-
-### Mobile Browsers
-- iOS Safari 14+ ✅
-- Chrome Mobile ✅
-- Firefox Mobile ✅
-- Samsung Internet ✅
-
-### Required Features
-- ES6 JavaScript support
-- CSS Grid and Flexbox
-- CSS Custom Properties
-- Intersection Observer API
-- Request Animation Frame
-
-## 🚀 Next Steps
-
-This static prototype serves as the foundation for the full Vite-based implementation. The next steps include:
-
-1. **Vite Integration**: Convert to React/TypeScript components
-2. **Component Architecture**: Break down into reusable React components
-3. **State Management**: Implement proper state handling
-4. **Data Integration**: Connect to real APIs
-5. **Asset Optimization**: Implement image optimization pipeline
-6. **Testing**: Add unit and integration tests
-7. **Deployment**: Configure production build and deployment
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Images not loading**
-- Check file paths in `mock-data.js`
-- Ensure assets folder structure is correct
-- Verify image formats (JPG, PNG, SVG supported)
-
-**Animations not working**
-- Check browser console for JavaScript errors
-- Verify CSS is loaded properly
-- Test with reduced motion settings disabled
-
-**Responsive layout issues**
-- Test at different viewport sizes
-- Check Tailwind classes in HTML
-- Verify CSS custom properties are loaded
-
-**Performance issues**
-- Use browser developer tools for performance profiling
-- Check for JavaScript errors in console
-- Verify image file sizes are optimized
-
-### Debug Mode
-
-Enable debug logging by opening browser console:
-```javascript
-// Check data loading
-console.log('Available data:', window.MockData);
-
-// Check component initialization
-console.log('Components initialized:', {
-    marquee: !!document.getElementById('marquee-content'),
-    features: !!document.getElementById('feature-grid'),
-    testimonials: !!document.getElementById('testimonial-card')
-});
-```
-
-## 🧪 Performance Testing with Lighthouse
-
-### Running Lighthouse Audit
-
-To measure the prototype's performance, run a Lighthouse audit:
+## 🚀 Gyors start
 
 ```bash
-# Ensure the server is running
-npm run prototype:preview
-
-# In another terminal, run Lighthouse
-npx lighthouse http://localhost:5500 --view
+# Nyisd meg a prototípust egy webszerver segítségével
+cd /docs/prototypes/winmix-static
+python3 -m http.server 8000
+# vagy
+npx http-server
 ```
 
-### Expected Performance Targets
+Majd nyisd meg a `http://localhost:8000` oldalt a böngészőben.
 
-The prototype is designed to meet the following performance targets:
+## 🎯 Implementált Komponensek
 
-| Metric | Target | Description |
-|--------|--------|-------------|
-| **LCP** (Largest Contentful Paint) | < 2.5s | Main content should load quickly |
-| **INP** (Interaction to Next Paint) | < 200ms | User interactions should feel responsive |
-| **CLS** (Cumulative Layout Shift) | < 0.1 | Visual stability during page load |
-| **FCP** (First Contentful Paint) | < 1.8s | Content should appear quickly |
-| **Speed Index** | < 3.4s | Page should feel visually complete |
-| **Performance Score** | ≥ 90 | Overall Lighthouse performance |
-| **Accessibility Score** | ≥ 90 | WCAG 2.1 AA compliance |
+### 1. Animated Shiny CTA Button
 
-### Asset Size Targets
+**Jellemzők:**
+- Hover/click eseményekre újraindul a shimmer animáció
+- 1000ms késleltetéssel az oldal betöltésekor automatikus shimmer
+- Teljes körű keyboard navigáció (Tab, Enter, Space)
+- ARIA attribútumok az akadálymentesítéshez
 
-- **CSS Bundle**: < 20KB (styles.css ~8.4KB ✅)
-- **JS Bundle**: < 50KB total (script.js ~16.3KB + mock-data.js ~11.5KB = ~27.8KB ✅)
-- **Total Images**: < 200KB (avatars + integrations + hero bg = ~84KB ✅)
+**Testreszabás:**
+```html
+<button class="btn-cta" aria-label="Saját akció">
+  Saját CTA Text
+  <span class="btn-cta-shine"></span>
+</button>
+```
 
-### Responsive Testing
+### 2. Community Marquee (Végtelenített Avatar Görgetés)
 
-Test the prototype at the following breakpoints:
+**Jellemzők:**
+- Automatikus végtelenített görgetés a duplikált sorokkal
+- Sebesség: `data-speed` attribútummal beállítható (alapértelmezett: 30s)
+- Pause on hover (desktop) / tap-to-pause (mobile)
+- GPU acceleráció (`will-change`, `transform: translateZ(0)`)
+- Responsive: Desktop 8 item, tablet 4 item, mobile 2 item
+
+**Testreszabás:**
+```html
+<div class="marquee-container" data-speed="20" data-pause-on-hover="true">
+  <div class="marquee">
+    <!-- Automatikusan generálódik a mock-data.js-ből -->
+  </div>
+</div>
+```
+
+**Data attribútumok:**
+- `data-speed`: Forgás időtartama másodpercben (alapértelmezett: 30)
+- `data-pause-on-hover`: Felfüggesztés hover-on (alapértelmezett: true)
+
+### 3. Feature Grid - IntersectionObserver Scroll Trigger
+
+**Jellemzők:**
+- Stagger-fade animáció a scroll trigger-re
+- Mindegyik kártya egyénileg késleltetett késleltetéssel (`data-stagger-delay`)
+- IntersectionObserver: 10% threshold, 50px root margin
+- CSS class `.revealed` az aktív animáció jelzésére
+
+**Testreszabás:**
+```html
+<div class="features-grid" data-threshold="0.1" data-stagger-delay="100">
+  <!-- Automatikusan generálódik -->
+</div>
+```
+
+**Data attribútumok:**
+- `data-threshold`: IntersectionObserver threshold (alapértelmezett: 0.1)
+- `data-stagger-delay`: Ms késleltetés az egyes kártyák között (alapértelmezett: 100)
+
+### 4. Integration Grid - Status Jelzők és Hover Animációk
+
+**Jellemzők:**
+- Mock státusz indikátorok (active/connecting)
+- Glow-pulse animáció a status jelzőkön
+- Teljes keyboard navigáció (Tab, Enter, Space)
+- Hover effect: skálázás + glow shadow
+- Dinamikus ARIA attribútumok
+
+**Testreszabás:**
+
+Az integrációs kártyák az `MOCK_INTEGRATIONS` tömbből generálódnak:
+
+```javascript
+// mock-data.js-ben
+export const MOCK_INTEGRATIONS = [
+  { id: 1, name: 'Platform Neve', logo: '📊', status: 'active', color: '#10b981' },
+  // ... további elemek
+];
+```
+
+### 5. Quote/Testimonial Carousel
+
+**Jellemzők:**
+- Auto-advance: 8000ms (alapértelmezett)
+- Manual navigation: nyilak + pontok
+- Pause on hover / focus
+- Keyboard vezérlés: `←` (előző), `→` (következő)
+- Teljes ARIA szerepek és élő régiók
+
+**Testreszabás:**
+```html
+<div class="carousel" 
+     data-auto-advance="true" 
+     data-interval="8000" 
+     data-enable-keyboard="true">
+  <!-- Automatikusan generálódik -->
+</div>
+```
+
+**Data attribútumok:**
+- `data-auto-advance`: Auto-advance engedélyezése (alapértelmezett: true)
+- `data-interval`: Auto-advance intervallum ms-ben (alapértelmezett: 8000)
+- `data-enable-keyboard`: Billentyűzet navigáció (alapértelmezett: true)
+- `data-enable-arrows`: Nyíl gombok megjelenítése (alapértelmezett: true)
+- `data-enable-dots`: Pont gombok megjelenítése (alapértelmezett: true)
+
+## ♿ Akadálymentesítés (a11y)
+
+### WCAG 2.1 AA Conformity
+
+- ✅ **Keyboard Navigation**: Minden interaktív elem elérhető Tab-bal
+- ✅ **Focus Indicators**: Jól látható fokusz körök az összes gombón
+- ✅ **ARIA Labels**: `aria-label`, `aria-live`, `aria-selected`, `aria-roledescription`
+- ✅ **Screen Reader Support**: Semantic HTML, alt textek, role attribútumok
+- ✅ **Color Contrast**: 7:1 minimum kontrasztratio az összes szöveghez
+- ✅ **prefers-reduced-motion**: Teljes támogatás - animációk leállnak
+
+### Prefers-Reduced-Motion Támogatás
+
+Az oldal automatikusan detektálja a felhasználó `prefers-reduced-motion` preferenciáját:
+
+```javascript
+// prototype.js-ben
+const prefersReducedMotion = () => {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+};
+```
+
+Amikor aktív:
+- Marquee: Leáll a görgetés
+- Feature cards: Nincsenek stagger animációk
+- Carousel: Nincsenek auto-advance
+- CTA button: Shimmer effect kikapcsolt
+
+### Minimum Touch Target Méret
+
+- Összes gomb: min 48px × 48px
+- Marquee avatárok: 80px-120px
+- Carousel nyilak: 44px × 44px
+- Carousel pontok: 10px-24px
+
+## 🎨 Testreszabás
+
+### Szín Séma
+
+Az összes szín a CSS változókban van definiálva az `index.html` fájlban:
+
+```css
+:root {
+  --color-primary: #10b981;           /* Emerald */
+  --color-secondary: #a855f7;         /* Violet */
+  --color-background: #050505;        /* Dark */
+  --color-foreground: #f1f5f9;        /* Light */
+  --color-muted: #94a3b8;             /* Gray */
+}
+```
+
+Módosítsd ezeket az `styles.css` fájlban.
+
+### Animáció Sebessége
+
+```css
+:root {
+  --transition-fast: 150ms;
+  --transition-normal: 200ms;
+  --transition-slow: 300ms;
+}
+```
+
+### Marquee Sebesség Módosítása
+
+```html
+<!-- Helyileg gyorsabb (20 másodperc) -->
+<div class="marquee-container" data-speed="20">
+  <!-- ... -->
+</div>
+```
+
+### Feature Card Stagger Delay
+
+```html
+<!-- Nagyobb késleltetés az egyes kártyák között -->
+<div class="features-grid" data-stagger-delay="150">
+  <!-- ... -->
+</div>
+```
+
+### Carousel Auto-Advance Intervallum
+
+```html
+<!-- 5 másodperces intervallum -->
+<div class="carousel" data-interval="5000">
+  <!-- ... -->
+</div>
+```
+
+## 📊 Mock Adatok Módosítása
+
+### Avatar-ok
+
+Az `mock-data.js` fájlban szerkeszd az `MOCK_AVATARS` tömböt:
+
+```javascript
+export const MOCK_AVATARS = [
+  {
+    id: '1',
+    name: 'Maria Chen',
+    role: 'Professional Tipster',
+    src: 'https://example.com/avatar.jpg',  // SVG vagy URL
+    badge: 'Top Predictor'
+  },
+  // ... továbbiItemek
+];
+```
+
+### Feature-k
+
+```javascript
+export const MOCK_FEATURES = [
+  {
+    icon: '⚡',
+    title: 'AI-Powered Analysis',
+    description: 'Leírás...',
+    metrics: ['Real-time', 'ML-Driven']
+  },
+  // ... további elemek
+];
+```
+
+### Testimonial-ok
+
+```javascript
+export const MOCK_TESTIMONIALS = [
+  {
+    id: '1',
+    quote: 'Az idézet szövege...',
+    author: 'Szerző Neve',
+    role: 'Szerep',
+    location: 'Hely',
+    rating: 5,
+    metric: 'Metrika'
+  },
+  // ... további elemek
+];
+```
+
+### Integrációk
+
+```javascript
+export const MOCK_INTEGRATIONS = [
+  {
+    id: 1,
+    name: 'Platform Neve',
+    logo: '📊',
+    status: 'active' | 'connecting',
+    color: '#10b981'
+  },
+  // ... további elemek
+];
+```
+
+## 🔧 Fejlesztői Info
+
+### Modul Struktúra
+
+**prototype.js** az alábbi manager osztályokat exportálja:
+
+```javascript
+export {
+  CTAButtonManager,        // CTA button shimmer
+  MarqueeManager,          // Avatar marquee
+  FeatureGridManager,      // Feature cards scroll reveal
+  IntegrationGridManager,  // Integration status + hover
+  TestimonialCarousel,     // Quote carousel
+  FeatureCTAManager        // Feature section CTA
+};
+```
+
+Mindegyik osztály automatikusan inicializálódik a DOMContentLoaded eseményre.
+
+### Keyboard Vezérlés
+
+| Gomb | Funkció |
+|------|---------|
+| Tab | Navigáció az interaktív elemek között |
+| Enter / Space | Gombok aktiválása |
+| ← (Bal nyíl) | Előző testimonial |
+| → (Jobb nyíl) | Következő testimonial |
+
+### Touch Interakciók
+
+- **Marquee**: Tap-to-pause 3 másodperces szünettel
+- **Carousel**: Swipe támogatás (opcionális, jelenleg nem implementálva)
+
+### CSS Class Megnevezések
+
+- `.shimmer` - CTA button shimmer animáció aktív
+- `.paused` - Marquee szünetelt
+- `.revealed` - Feature card scroll-trigger után
+- `.active` - Carousel slide vagy dot aktív
+
+## 🧪 Tesztelés
+
+### Önálló HTML Fájl
+
+Nincs build folyamat szükséges! Az `index.html`-t közvetlenül megnyithatod egy webszerver segítségével:
 
 ```bash
-# Mobile
-# 320px × 568px (iPhone SE)
+# Python 3
+python3 -m http.server 8000
 
-# Tablet
-# 768px × 1024px (iPad)
+# Node.js
+npx http-server
 
-# Desktop
-# 1920px × 1080px (Full HD)
+# PHP
+php -S localhost:8000
 ```
 
-Use Chrome DevTools Device Toolbar or run the automated QA script:
+### Tesztelési Checklist
 
-```bash
-# Requires Playwright
-npm install -D playwright
-npx playwright install chromium
+- [ ] Marquee végtelenített és szünetel hover-on
+- [ ] Feature kártyák scroll-on megjelennek
+- [ ] CTA button shimmerez hover/click-on
+- [ ] Integration status jelzők pulzálnak
+- [ ] Carousel auto-advance és manual nav működik
+- [ ] Keyboard navigáció működik (Tab, Enter, nyilak)
+- [ ] Fokusz indikátorok láthatók
+- [ ] prefers-reduced-motion: animációk leállnak
+- [ ] Mobile-on (320px) minden működik
+- [ ] Tablet-en (768px) minden működik
+- [ ] Desktop-on (1024px+) minden működik
 
-# Run responsive QA test
-node scripts/dev/qa-prototype-responsive.mjs
-```
+### Chrome DevTools Testing
 
-The QA script will:
-- Test all three breakpoints (320px, 768px, 1024px+)
-- Check for horizontal overflow issues
-- Validate touch target sizes (≥48×48px on mobile)
-- Verify marquee animations
-- Capture screenshots for manual review
+1. **Accessibility Audit**: F12 → Lighthouse → Accessibility
+2. **Motion Testing**: F12 → Rendering → Emulate CSS media feature prefers-reduced-motion
+3. **Mobile Testing**: F12 → Device Toolbar (Ctrl+Shift+M)
+4. **Network Throttling**: F12 → Network → Slow 3G
 
-Results will be saved to `qa-screenshots/` directory.
+## 🐛 Conhecidos Korlátok
+
+1. **Marquee nem szinkronizálódik a csoportos képernyőn** - CSS alapú megoldás (a JS-ből érkező duplikálással működik)
+2. **Carousel swipe nem implementálva** - Nyilak és pontok navigációval működik
+3. **Egyedi avatár képek** - Jelenleg SVG gradient alapú avatárok (SVG-ből vagy képekből módosítható)
+4. **Progress bar** - Nincs visual progress a carousel-nál (csak pontok)
+
+## 📈 Performance
+
+### Target Metrics
+
+- **LCP** (Largest Contentful Paint): < 2.5s
+- **FID** (First Input Delay): < 100ms
+- **CLS** (Cumulative Layout Shift): < 0.1
+- **JS Bundle**: < 20KB gzipped (prototype.js + mock-data.js)
+- **CSS Bundle**: < 15KB gzipped
+
+### Optimizációk
+
+- CSS3 animációk helyett GPU-accelerált `transform`-ot használunk
+- `will-change` a marquee-n a smooth scrollinghez
+- `lazy` loading az avatár képekhez
+- IntersectionObserver a feature cards scroll-trigger-hez
+
+## 📝 Aktualizálási Napló
+
+### v1.0 (2024-12)
+
+- ✅ Shimmer CTA button implementáció
+- ✅ Végtelenített marquee avatar görgetés
+- ✅ Scroll-based feature card reveal
+- ✅ Integration status grid
+- ✅ Testimonial auto-advance carousel
+- ✅ Teljes WCAG 2.1 AA akadálymentesítés
+- ✅ prefers-reduced-motion támogatás
+- ✅ Keyboard navigáció
+- ✅ Mock data management
+- ✅ Responsive design (mobile-first)
 
 ## 📄 License
 
-This prototype is part of the WinMix TipsterHub project and follows the same licensing terms as the main application.
+Minden kód a WinMix projekt része és a projekthez tartozó licenc alatt kerül felhasználásra.
 
-## 🤝 Contributing
+## 🙋 Támogatás
 
-When making changes to this prototype:
-
-1. **Test responsiveness** at all breakpoints (320px, 768px, 1024px+)
-2. **Verify accessibility** with keyboard navigation and screen readers
-3. **Check performance** impact with Lighthouse (target: LCP <2.5s, INP <200ms, CLS <0.1)
-4. **Validate HTML** structure and semantics
-5. **Test cross-browser** compatibility
-6. **Update documentation** for any new features
-7. **Run QA script** before committing changes
+Kérdéseid vagy bugjelentéseid? Nyiss egy GitHub issue-t vagy vedd fel a kapcsolatot a fejlesztési csapattal.
 
 ---
 
-**Note**: This is a static prototype for demonstration purposes. For the full production implementation, refer to the Vite-based React application in the main project directory.
+**Készült a design specifikáció alapján:**
+- WINMIX_WEBPAGE_REDESIGN_PROMPT.md
+- WINMIX_DESIGN_CODE_EXAMPLES.md
+- WINMIX_DESIGN_IMPLEMENTATION_CHECKLIST.md
